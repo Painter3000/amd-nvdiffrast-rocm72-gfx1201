@@ -130,6 +130,12 @@ cd ~/therock_test/nvdiffrast_rocm72_gfx1201_reinstall_bundle_v4
 ./run_test_advanced_pipeline.sh
 ```
 
+Optional finite-difference gradient test:
+
+```bash
+python ./tests/test_rasterizer_gradients_v4.py --test interior
+```
+
 ## Known-good validation output
 
 Minimal:
@@ -163,6 +169,23 @@ Final:
   ADVANCED NVDIFFRAST ROCm/RDNA PIPELINE TEST PASSED
 ```
 
+Interior finite-difference gradient check:
+
+```text
+test_rasterizer_gradients_v4.py --test interior
+resolution: 64x64
+crop: 8x8 central interior crop
+
+crop covered: 64/64
+crop tri IDs: [1.0]
+
+max |analytic - numeric| = 0.00218090
+max relative error       = 0.02177946
+PASS
+```
+
+This validates that analytical gradients for the smooth rasterize/interpolate interior path match numerical finite differences in a fully covered region with no silhouette, no triangle-ID changes, and no coverage-edge jumps.
+
 ## Repository layout
 
 ```text
@@ -176,44 +199,49 @@ Final:
 ├── tests/
 │   ├── test_min_triangle.sh
 │   ├── test_advanced_pipeline.py
+│   ├── test_rasterizer_gradients_v4.py
 │   └── run_test_advanced_pipeline.sh
-└── docs/
-    ├── README_ROCM72_GFX1201_v36.md
-    └── KNOWN_OPEN_QUESTIONS.md
+├── docs/
+│   ├── README_ROCM72_GFX1201_v36.md
+│   └── KNOWN_OPEN_QUESTIONS.md
+└── third_party/
+    ├── README.md
+    ├── nvdiffrast/
+    │   └── LICENSE.txt
+    └── tashibi-nvdiffrast-rocm-patch/
+        └── LICENSE
 ```
 
 ## License and attribution
 
-This repository contains original helper scripts plus patch content for
-`NVlabs/nvdiffrast`.
+This repository contains original helper scripts plus patch content for `NVlabs/nvdiffrast`.
 
-- Original helper scripts and documentation in this repository are provided under
-  the MIT License. See `LICENSE`.
-- Upstream `NVlabs/nvdiffrast` is copyright NVIDIA Corporation and is made
-  available under the NVIDIA Source Code License (1-Way Commercial). A complete
-  copy is included at `third_party/nvdiffrast/LICENSE.txt`.
-- Earlier ROCm patch work by `tashibi/nvdiffrast-rocm-patch` is acknowledged.
-  Its MIT license is included at
-  `third_party/tashibi-nvdiffrast-rocm-patch/LICENSE`.
+- Original helper scripts and documentation in this repository are provided under the MIT License. See `LICENSE`.
+- Upstream `NVlabs/nvdiffrast` is copyright NVIDIA Corporation and is made available under the NVIDIA Source Code License (1-Way Commercial). A complete copy is included at `third_party/nvdiffrast/LICENSE.txt`.
+- Earlier ROCm patch work by `tashibi/nvdiffrast-rocm-patch` is acknowledged. Its MIT license is included at `third_party/tashibi-nvdiffrast-rocm-patch/LICENSE`.
 - See `NOTICE.md` for attribution and license-boundary details.
 
-This is not legal advice. Read the upstream licenses before redistributing or
-using this package in a project.
+This is not legal advice. Read the upstream licenses before redistributing or using this package in a project.
 
-## Known open questions
+## Known validation notes and open questions
 
-The current v36 patch is validated for the included rasterize forward/backward
-tests, but the following are still open:
+The current v36 patch is validated for the included rasterize forward/backward tests and for a smooth interior finite-difference gradient test.
+
+Still open:
 
 ```text
-- v34/v36 output relationship should be tested on more complex row/tile cases.
-- z/w gradient behavior has not been checked with finite differences.
-- antialias, interpolate, and texture paths need separate stress tests.
+- v34/v36 output relationship should still be tested on more complex row/tile cases.
+- antialias / silhouette gradients need separate stress tests.
+- texture sampling needs separate stress tests.
 - huge meshes and long PSHuman / continuous-remeshing loops remain production tests.
+- offscreen/clipping stress cases remain open.
+- depth-ordering / z-sensitive finite-difference tests remain open.
+- performance benchmarking remains open.
 ```
 
-See `docs/KNOWN_OPEN_QUESTIONS.md` for details.
+The `interpolate` path is no longer fully unvalidated: the smooth interior rasterize/interpolate gradient path has passed the v4 finite-difference test. More complex interpolation cases should still be covered by production tests.
 
+See `docs/KNOWN_OPEN_QUESTIONS.md` for details.
 
 ## HIP crash hygiene
 
@@ -234,6 +262,7 @@ Validated:
 - 256x256 and 512x512 multi-triangle rasterize
 - rasterize backward/autograd sanity
 - finite and nonzero gradients
+- interior finite-difference gradient check for rasterize/interpolate
 ```
 
 Not yet fully validated:
@@ -241,7 +270,9 @@ Not yet fully validated:
 ```text
 - huge production meshes
 - long PSHuman / continuous-remeshing optimization loops
-- finite-difference gradient comparison
-- antialias / interpolate / texture paths as separate stress tests
+- antialias / silhouette gradients
+- texture sampling
+- offscreen/clipping stress cases
+- depth-ordering / z-sensitive finite-difference tests
 - performance benchmarks
 ```
