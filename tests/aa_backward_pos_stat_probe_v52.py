@@ -5,7 +5,7 @@ aa_backward_pos_stat_probe_v52.py
 Statistical validation probe for the final v52 antialias backward/grad
 workBuffer y-counter fix (v51 in this repo's patch numbering).
 
-Wraps nvdiffrast_antialias_grid_bisect_v44b.py (--stages backward_pos), which
+Wraps test_antialias_backward_matrix_v52.py (--stages backward_pos), which
 is the only stage that actually calls loss.backward() and reads back
 pos.grad - unlike --stages call,sync,finite,diff, which exercises the
 antialias_fwd/antialias_grad setup and data paths without ever triggering a
@@ -16,14 +16,15 @@ Runs the bisect probe N times and aggregates the success rate PER CASE
 was shown to be insufficient given the run-to-run non-determinism observed
 elsewhere in this validation effort.
 
-Dependency: nvdiffrast_antialias_grid_bisect_v44b.py must be present in the
-same directory (or pointed to via --probe-script).
+Dependency: test_antialias_backward_matrix_v52.py must be present in the
+same directory (or pointed to via --probe-script). This file was formerly
+named nvdiffrast_antialias_grid_bisect_v44b.py before the final v52 rename.
 
 Usage:
   python aa_backward_pos_stat_probe_v52.py --runs 20 \\
     --cells-list 1,4,16 --res-list 160,180,182,192,224,256 \\
     --topos explicit --colors interp --pos-grads 1 --stages backward_pos \\
-    --probe-script ./nvdiffrast_antialias_grid_bisect_v44b.py \\
+    --probe-script ./test_antialias_backward_matrix_v52.py \\
     --label "final v52 AA backward_pos statistical probe"
 """
 
@@ -88,7 +89,7 @@ def main():
     ap.add_argument("--colors", default="interp")
     ap.add_argument("--pos-grads", default="1")
     ap.add_argument("--stages", default="backward_pos")
-    ap.add_argument("--probe-script", default="./nvdiffrast_antialias_grid_bisect_v44b.py")
+    ap.add_argument("--probe-script", default="./test_antialias_backward_matrix_v52.py")
     ap.add_argument("--label", default="final v52 AA backward_pos statistical probe")
     args = ap.parse_args()
 
