@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-nvdiffrast_antialias_grid_bisect_v44b.py
+test_antialias_backward_matrix_v52.py
 
 Bisects the remaining validated failure after clean rebuild:
   - antialias_forward_grid
   - antialias_backward_pos_grid
 
 Each case runs in its own subprocess so HIP crashes do not poison the runner.
+
+Note: this file was formerly named nvdiffrast_antialias_grid_bisect_v44b.py.
+Any wrapper that references it by the old name (e.g. --probe-script defaults
+in statistical probe scripts) must be updated to this filename.
 """
 
 import argparse
