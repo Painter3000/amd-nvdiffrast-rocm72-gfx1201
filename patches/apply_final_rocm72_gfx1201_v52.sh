@@ -57,7 +57,10 @@ run_patch() {
   echo "================================================================"
   echo "APPLY: $patch"
   echo "================================================================"
-  REPO="$REPO" bash "$patch"
+  (
+    cd "$REPO"
+    REPO="$REPO" bash "$patch"
+  )
 }
 
 [[ -d "$REPO" ]] || die "REPO does not exist: $REPO"
