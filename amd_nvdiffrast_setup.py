@@ -1,22 +1,44 @@
 #!/usr/bin/env python3
+
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
+from typing import TypedDict
 
 
 HERE = Path(__file__).resolve().parent
 
 
-def run(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> None:
+class GitIdentity(TypedDict):
+    path: str
+    head: str
+    branch: str
+    remote: str
+    state: str
+
+
+def run(
+    cmd: list[str],
+    *,
+    cwd: Path | None = None,
+    env: dict[str, str] | None = None,
+) -> None:
     print("\n$", " ".join(str(x) for x in cmd))
     if cwd:
         print("  cwd:", cwd)
-    subprocess.run([str(x) for x in cmd], cwd=str(cwd) if cwd else None, env=env, check=True)
+    subprocess.run(
+        [str(x) for x in cmd],
+        cwd=str(cwd) if cwd else None,
+        env=env,
+        check=True,
+    )
 
 
 def die(msg: str) -> None:
@@ -26,6 +48,68 @@ def die(msg: str) -> None:
 
 def path_expand(s: str) -> Path:
     return Path(s).expanduser().resolve()
+
+
+def utc_now_iso() -> str:
+    return (
+        datetime.now(timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
+
+
+def git_output(repo: Path, *args: str) -> str | None:
+    """Return stripped Git output, or None when it is unavailable."""
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(repo), *args],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+
+def get_git_identity(repo: Path) -> GitIdentity:
+    """Capture enough Git state to bind a validation log to exact source."""
+    head = git_output(repo, "rev-parse", "HEAD")
+    branch = git_output(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    remote = git_output(repo, "config", "--get", "remote.origin.url")
+    porcelain = git_output(repo, "status", "--porcelain", "--untracked-files=normal")
+
+    if head is None:
+        state = "not-a-git-repository"
+    elif porcelain:
+        state = "dirty"
+    else:
+        state = "clean"
+
+    return {
+        "path": str(repo),
+        "head": head or "unavailable",
+        "branch": branch or "unavailable",
+        "remote": remote or "unavailable",
+        "state": state,
+    }
+
+
+def print_git_identity(label: str, identity: GitIdentity) -> None:
+    print(f"{label} path:   {identity['path']}")
+    print(f"{label} HEAD:   {identity['head']}")
+    print(f"{label} branch: {identity['branch']}")
+    print(f"{label} remote: {identity['remote']}")
+    print(f"{label} state:  {identity['state']}")
+
+    if identity["state"] == "dirty":
+        print(
+            f"WARNING: {label} working tree has uncommitted or untracked changes; "
+            "HEAD alone does not identify the exact executed source."
+        )
+    elif identity["state"] == "not-a-git-repository":
+        print(
+            f"WARNING: {label} is not a readable Git repository; "
+            "an exact source revision could not be recorded."
+        )
 
 
 def detect_venv(args_venv: str | None, root: Path) -> Path:
@@ -64,8 +148,10 @@ def ensure_repo(repo: Path, repo_url: str, branch: str | None) -> None:
     if (repo / ".git").exists():
         print(f"Using existing nvdiffrast repo: {repo}")
         return
+
     if repo.exists() and any(repo.iterdir()):
         die(f"repo path exists but is not an empty git repo: {repo}")
+
     repo.parent.mkdir(parents=True, exist_ok=True)
     cmd = ["git", "clone", repo_url, str(repo)]
     if branch:
@@ -73,39 +159,51 @@ def ensure_repo(repo: Path, repo_url: str, branch: str | None) -> None:
     run(cmd)
 
 
-def make_env(args: argparse.Namespace, root: Path, repo: Path, venv: Path, bundle_dir: Path) -> dict[str, str]:
+def make_env(
+    args: argparse.Namespace,
+    root: Path,
+    repo: Path,
+    venv: Path,
+    bundle_dir: Path,
+) -> dict[str, str]:
     env = os.environ.copy()
-    env.update({
-        "ROOT": str(root),
-        "REPO": str(repo),
-        "VENV": str(venv),
-        "BUNDLE_DIR": str(bundle_dir),
-        "ROCM_PATH": args.rocm_path,
-        "PYTORCH_ROCM_ARCH": args.arch,
-        "FORCE_CUDA": "1",
-        "MAX_JOBS": str(args.max_jobs),
-        "TORCH_DISABLE_ADDR2LINE": env.get("TORCH_DISABLE_ADDR2LINE", "1"),
-    })
+    env.update(
+        {
+            "ROOT": str(root),
+            "REPO": str(repo),
+            "VENV": str(venv),
+            "BUNDLE_DIR": str(bundle_dir),
+            "ROCM_PATH": args.rocm_path,
+            "PYTORCH_ROCM_ARCH": args.arch,
+            "FORCE_CUDA": "1",
+            "MAX_JOBS": str(args.max_jobs),
+            "TORCH_DISABLE_ADDR2LINE": env.get("TORCH_DISABLE_ADDR2LINE", "1"),
+        }
+    )
 
     # ROCm clang avoids GCC ICEs that were observed in common_hip.cpp.
     env.setdefault("CC", str(Path(args.rocm_path) / "llvm" / "bin" / "clang"))
     env.setdefault("CXX", str(Path(args.rocm_path) / "llvm" / "bin" / "clang++"))
 
     # NVDR_ROCM_C10_NO_CMAKE_CONFIGURE
-    # csrc/common/framework.h pulls in <ATen/cuda/CUDAContext.h>, whose chain ends
-    # at <c10/cuda/CUDAMacros.h>. That header includes the CMake-generated file
-    # c10/cuda/impl/cuda_cmake_macros.h, which PyTorch's ROCm wheels do not ship.
-    # CUDAMacros.h documents the escape hatch for exactly the AMD/HIP case, so we
-    # define it for the host C++ objects (the torch_*.cpp wrappers).
-    # This must be set here as well, not just in the generator: the clean rebuild
-    # after the v52 patch stack runs its own `pip install .` with this env.
+    # csrc/common/framework.h pulls in <ATen/cuda/CUDAContext.h>, whose chain
+    # ends at <c10/cuda/CUDAMacros.h>. That header includes the CMake-generated
+    # file c10/cuda/impl/cuda_cmake_macros.h, which PyTorch's ROCm wheels do
+    # not ship. CUDAMacros.h documents the escape hatch for the AMD/HIP case,
+    # so define it for the host C++ objects (the torch_*.cpp wrappers).
+    #
+    # This must be set here as well, not just in the generator: the clean
+    # rebuild after the v52 patch stack runs its own `pip install .`.
     c10_guard = "-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE"
     cppflags = env.get("CPPFLAGS", "")
     if c10_guard not in cppflags:
         env["CPPFLAGS"] = f"{c10_guard} {cppflags}".strip()
 
     compat = root / "nvdiffrast_rocm_cuda_compat"
-    cpath_parts = [str(compat), str(Path(args.rocm_path) / "include" / "hipsparse")]
+    cpath_parts = [
+        str(compat),
+        str(Path(args.rocm_path) / "include" / "hipsparse"),
+    ]
     if env.get("CPATH"):
         cpath_parts.append(env["CPATH"])
     env["CPATH"] = ":".join(cpath_parts)
@@ -132,7 +230,6 @@ def copy_tests(bundle_dir: Path) -> None:
         "test_antialias_backward_matrix_v52.py",
         "nvdiffrast_interpolate_resolution_probe_v6.py",
         "test_many_triangles_stress_v1.py",
-        # Missing tests referenced in README: include backward_pos statistical probe and wrapper
         "aa_backward_pos_stat_probe_v52.py",
         "run_v52_backward_stat.sh",
     ]
@@ -151,7 +248,9 @@ def copy_tests(bundle_dir: Path) -> None:
 def clean_rebuild(repo: Path, venv: Path, env: dict[str, str]) -> None:
     py = py_in_venv(venv)
     site_code = "import site; print(site.getsitepackages()[0])"
-    site = Path(subprocess.check_output([str(py), "-c", site_code], text=True).strip())
+    site = Path(
+        subprocess.check_output([str(py), "-c", site_code], text=True).strip()
+    )
 
     script = f'''
 set -euo pipefail
@@ -180,6 +279,7 @@ python -m pip install . --no-build-isolation --no-cache-dir -v
 def verify_v52_markers(repo: Path) -> None:
     src = repo / "csrc" / "torch" / "torch_antialias.cpp"
     hip = repo / "csrc" / "torch" / "torch_antialias_hip.cpp"
+
     if not src.exists() or not hip.exists():
         die(f"missing antialias source files:\n  {src}\n  {hip}")
 
@@ -196,14 +296,25 @@ def verify_v52_markers(repo: Path) -> None:
     print(f"{hip}: v47={v47_hip} v51={v51_hip}")
 
     if (v47_src, v47_hip) != (1, 1):
-        die("v47 FIX must be present exactly once in both torch_antialias.cpp and torch_antialias_hip.cpp")
+        die(
+            "v47 FIX must be present exactly once in both "
+            "torch_antialias.cpp and torch_antialias_hip.cpp"
+        )
     if (v51_src, v51_hip) != (1, 1):
-        die("v51 FIX must be present exactly once in both torch_antialias.cpp and torch_antialias_hip.cpp")
+        die(
+            "v51 FIX must be present exactly once in both "
+            "torch_antialias.cpp and torch_antialias_hip.cpp"
+        )
 
     bad_patterns = [
-        "v46", "v48", "v49", "v50",
-        "hipStreamSynchronize", "hipDeviceSynchronize",
-        "cudaStreamSynchronize", "cudaDeviceSynchronize",
+        "v46",
+        "v48",
+        "v49",
+        "v50",
+        "hipStreamSynchronize",
+        "hipDeviceSynchronize",
+        "cudaStreamSynchronize",
+        "cudaDeviceSynchronize",
     ]
     for path in (src, hip):
         text = path.read_text(errors="replace")
@@ -214,7 +325,12 @@ def verify_v52_markers(repo: Path) -> None:
     print("OK: v47/v51 markers clean and no diagnostic sync markers found.")
 
 
-def run_v52_tests(repo: Path, tests_dir: Path, env: dict[str, str], validation: str) -> None:
+def run_v52_tests(
+    repo: Path,
+    tests_dir: Path,
+    env: dict[str, str],
+    validation: str,
+) -> None:
     if validation == "none":
         return
 
@@ -243,15 +359,26 @@ def run_v52_tests(repo: Path, tests_dir: Path, env: dict[str, str], validation: 
         stat = tests_dir / "aa_matrix_stat_probe.py"
         if stat.exists():
             print("\n=== Run v52 forward AA statistical probe ===")
-            run([
-                py_in_venv(Path(env["VENV"])), str(stat),
-                "--runs", "20",
-                "--shapes", "single,grid1,grid4,grid16",
-                "--res-list", "160,180,182,192,224,256",
-                "--colors", "interp",
-                "--hashes", "explicit",
-                "--label", "final v52 forward AA",
-            ], cwd=tests_dir, env=env)
+            run(
+                [
+                    py_in_venv(Path(env["VENV"])),
+                    str(stat),
+                    "--runs",
+                    "20",
+                    "--shapes",
+                    "single,grid1,grid4,grid16",
+                    "--res-list",
+                    "160,180,182,192,224,256",
+                    "--colors",
+                    "interp",
+                    "--hashes",
+                    "explicit",
+                    "--label",
+                    "final v52 forward AA",
+                ],
+                cwd=tests_dir,
+                env=env,
+            )
 
     if validation == "stress":
         stress = tests_dir / "run_v52_stress.sh"
@@ -262,39 +389,106 @@ def run_v52_tests(repo: Path, tests_dir: Path, env: dict[str, str], validation: 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        description="Build and validate nvdiffrast ROCm 7.2 / RDNA4 gfx1201 final v52 patch stack."
+        description=(
+            "Build and validate nvdiffrast ROCm 7.2 / RDNA4 gfx1201 "
+            "final v52 patch stack."
+        )
     )
-    ap.add_argument("--workdir", default="~/therock_test", help="Root workdir. Default: ~/therock_test")
-    ap.add_argument("--repo", default=None, help="nvdiffrast repo path. Default: <workdir>/nvdiffrast")
-    ap.add_argument("--venv", default=None, help="Existing ROCm PyTorch venv. Default: $VIRTUAL_ENV or <workdir>/venv")
-    ap.add_argument("--bundle-dir", default=None, help="Generated reinstall/test bundle path")
-    ap.add_argument("--repo-url", default="https://github.com/NVlabs/nvdiffrast.git", help="nvdiffrast upstream URL")
-    ap.add_argument("--branch", default=None, help="Optional nvdiffrast branch/tag")
-    ap.add_argument("--rocm-path", default="/opt/rocm", help="ROCm path. Default: /opt/rocm")
-    ap.add_argument("--arch", default="gfx1201", help="PYTORCH_ROCM_ARCH. Default: gfx1201")
-    ap.add_argument("--max-jobs", type=int, default=1, help="Build parallelism. Default: 1")
-    ap.add_argument("--skip-clone", action="store_true", help="Do not clone; require repo to exist")
-    ap.add_argument("--skip-tests", action="store_true", help="Alias for --validation none")
-    ap.add_argument("--validation", choices=["none", "quick", "full", "stress"], default="quick",
-                    help="Validation level after build. Default: quick")
+    ap.add_argument(
+        "--workdir",
+        default="~/therock_test",
+        help="Root workdir. Default: ~/therock_test",
+    )
+    ap.add_argument(
+        "--repo",
+        default=None,
+        help="nvdiffrast repo path. Default: <workdir>/nvdiffrast",
+    )
+    ap.add_argument(
+        "--venv",
+        default=None,
+        help=(
+            "Existing ROCm PyTorch venv. "
+            "Default: $VIRTUAL_ENV or <workdir>/venv"
+        ),
+    )
+    ap.add_argument(
+        "--bundle-dir",
+        default=None,
+        help="Generated reinstall/test bundle path",
+    )
+    ap.add_argument(
+        "--repo-url",
+        default="https://github.com/NVlabs/nvdiffrast.git",
+        help="nvdiffrast upstream URL",
+    )
+    ap.add_argument(
+        "--branch",
+        default=None,
+        help="Optional nvdiffrast branch/tag",
+    )
+    ap.add_argument(
+        "--rocm-path",
+        default="/opt/rocm",
+        help="ROCm path. Default: /opt/rocm",
+    )
+    ap.add_argument(
+        "--arch",
+        default="gfx1201",
+        help="PYTORCH_ROCM_ARCH. Default: gfx1201",
+    )
+    ap.add_argument(
+        "--max-jobs",
+        type=int,
+        default=1,
+        help="Build parallelism. Default: 1",
+    )
+    ap.add_argument(
+        "--skip-clone",
+        action="store_true",
+        help="Do not clone; require repo to exist",
+    )
+    ap.add_argument(
+        "--skip-tests",
+        action="store_true",
+        help="Alias for --validation none",
+    )
+    ap.add_argument(
+        "--validation",
+        choices=["none", "quick", "full", "stress"],
+        default="quick",
+        help="Validation level after build. Default: quick",
+    )
     args = ap.parse_args(argv)
 
     if args.skip_tests:
         args.validation = "none"
 
+    setup_start_utc = utc_now_iso()
+    setup_start_monotonic = time.monotonic()
+    installer_identity = get_git_identity(HERE)
+
     root = path_expand(args.workdir)
     repo = path_expand(args.repo) if args.repo else root / "nvdiffrast"
     venv = detect_venv(args.venv, root)
-    bundle_dir = path_expand(args.bundle_dir) if args.bundle_dir else root / "nvdiffrast_rocm72_gfx1201_final_v52_bundle"
+    bundle_dir = (
+        path_expand(args.bundle_dir)
+        if args.bundle_dir
+        else root / "nvdiffrast_rocm72_gfx1201_final_v52_bundle"
+    )
 
     print("=== AMD nvdiffrast ROCm72/gfx1201 final v52 setup ===")
-    print("workdir:   ", root)
-    print("repo:      ", repo)
-    print("venv:      ", venv)
-    print("bundle:    ", bundle_dir)
-    print("rocm path: ", args.rocm_path)
-    print("arch:      ", args.arch)
-    print("validation:", args.validation)
+    print("workdir:    ", root)
+    print("repo:       ", repo)
+    print("venv:       ", venv)
+    print("bundle:     ", bundle_dir)
+    print("rocm path:  ", args.rocm_path)
+    print("arch:       ", args.arch)
+    print("validation: ", args.validation)
+
+    print("\n=== Reproducibility metadata: setup start ===")
+    print("setup start UTC:", setup_start_utc)
+    print_git_identity("installer", installer_identity)
 
     root.mkdir(parents=True, exist_ok=True)
 
@@ -303,6 +497,15 @@ def main(argv: list[str] | None = None) -> int:
             die(f"--skip-clone was set but repo does not exist: {repo}")
     else:
         ensure_repo(repo, args.repo_url, args.branch)
+
+    upstream_identity = get_git_identity(repo)
+
+    print("\n=== Reproducibility metadata: upstream baseline ===")
+    print_git_identity("upstream nvdiffrast", upstream_identity)
+    print(
+        "NOTE: The upstream identity above was captured before any v52 "
+        "baseline or final-stack source modification."
+    )
 
     check_torch(venv, args.arch)
 
@@ -315,6 +518,13 @@ def main(argv: list[str] | None = None) -> int:
         die(f"missing final v52 patch stack script: {final_stack}")
 
     env = make_env(args, root, repo, venv, bundle_dir)
+    env.update(
+        {
+            "NVDR_SETUP_START_UTC": setup_start_utc,
+            "NVDR_INSTALLER_GIT_HEAD": installer_identity["head"],
+            "NVDR_UPSTREAM_GIT_HEAD": upstream_identity["head"],
+        }
+    )
 
     print("\n=== Generate v52 ROCm runtime baseline bundle ===")
     run(["bash", str(generator)], env=env)
@@ -345,13 +555,45 @@ def main(argv: list[str] | None = None) -> int:
     print("\n=== Run validation ===")
     run_v52_tests(repo, HERE / "tests", env, args.validation)
 
+    setup_end_utc = utc_now_iso()
+    elapsed_seconds = time.monotonic() - setup_start_monotonic
+
+    print("\n=== Reproducibility summary ===")
+    print("setup start UTC:        ", setup_start_utc)
+    print("setup end UTC:          ", setup_end_utc)
+    print("elapsed seconds:        ", f"{elapsed_seconds:.3f}")
+    print("installer git HEAD:     ", installer_identity["head"])
+    print("installer git state:    ", installer_identity["state"])
+    print("upstream git HEAD:      ", upstream_identity["head"])
+    print("upstream baseline state:", upstream_identity["state"])
+
+    if installer_identity["state"] != "clean":
+        print(
+            "WARNING: This run is not bound solely to the installer HEAD "
+            "because the installer working tree was not clean."
+        )
+    if upstream_identity["state"] != "clean":
+        print(
+            "WARNING: The upstream tree was not clean before patching; "
+            "this is not a pristine upstream-baseline validation."
+        )
+
     print("\n=== DONE ===")
     print("Patched nvdiffrast is installed in:", venv)
     print("Patched nvdiffrast repo:", repo)
     print("Validation bundle:", bundle_dir)
+
     print("\nRecommended commands:")
-    print(f'  cd "{repo}" && grep -c "v47 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp')
-    print(f'  cd "{repo}" && grep -c "v51 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp')
+    print(
+        f'  cd "{repo}" && grep -c "v47 FIX" '
+        "csrc/torch/torch_antialias.cpp "
+        "csrc/torch/torch_antialias_hip.cpp"
+    )
+    print(
+        f'  cd "{repo}" && grep -c "v51 FIX" '
+        "csrc/torch/torch_antialias.cpp "
+        "csrc/torch/torch_antialias_hip.cpp"
+    )
     print(f'  cd "{HERE / "tests"}" && ./run_v52_validation.sh')
     return 0
 
