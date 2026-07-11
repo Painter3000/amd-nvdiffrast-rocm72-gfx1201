@@ -73,8 +73,7 @@ Validated paths include:
 - antialias backward position-grid cases
 - antialias forward matrix stress over critical resolutions
 - antialias backward/grad matrix over cells=1,4,16 and res=160..256
-- antialias backward_pos statistical probe (real .backward() calls,
-  20 runs, 360/360 passed) over cells=1,4,16 and res=160..256
+- antialias backward_pos statistical probe (real .backward(), 20 runs, 360/360 passed) over cells=1,4,16 and res=160..256
 - basic texture forward and backward
 ```
 
@@ -328,6 +327,21 @@ export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/h
 python -m pip install . --no-build-isolation --no-cache-dir -v
 ```
 
+Note about CPATH when following the manual flow:
+
+The `nvdiffrast_rocm_cuda_compat` directory referenced in `CPATH` is created by
+the automated generator (`scripts/nvdiffrast_rocm72_bundle_v4_generator.sh`) when
+you use the recommended setup flow. If you apply the patches and rebuild
+manually without running the generator, you will likely see missing-header
+errors unless you create or populate that compatibility directory yourself.
+
+Options when following the manual path:
+- Run the generator instead (recommended) to produce `nvdiffrast_rocm_cuda_compat`.
+- Manually create `~/therock_test/nvdiffrast_rocm_cuda_compat` and copy the
+  required compatibility headers into it (these are small helper headers used
+  to compile against ROCm/HIP).
+- Adjust `CPATH` to point at whatever headers you have prepared.
+
 ---
 
 ## Validation
@@ -418,7 +432,7 @@ export TORCH_DISABLE_ADDR2LINE=1
 
 ## Remaining open questions
 
-See [`KNOWN_OPEN_QUESTIONS.md`](KNOWN_OPEN_QUESTIONS.md).
+See [`docs/KNOWN_OPEN_QUESTIONS_v52.md`](docs/KNOWN_OPEN_QUESTIONS_v52.md).
 
 Current short version:
 
