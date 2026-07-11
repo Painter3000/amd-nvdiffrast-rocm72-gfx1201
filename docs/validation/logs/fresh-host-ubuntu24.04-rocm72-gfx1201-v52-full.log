@@ -1,27 +1,35 @@
-(venv) oem@oem-System-Product-Name:~/therock_test$ git clone https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
+(venv) oem@oem-System-Product-Name:~$ cd ~/therock_test
+git clone https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
 cd amd-nvdiffrast-rocm72-gfx1201
-
-python ./amd_nvdiffrast_setup.py \
+Klone nach 'amd-nvdiffrast-rocm72-gfx1201' …
+remote: Enumerating objects: 194, done.
+remote: Counting objects: 100% (194/194), done.
+remote: Compressing objects: 100% (190/190), done.
+remote: Total 194 (delta 88), reused 0 (delta 0), pack-reused 0 (from 0)
+Empfange Objekte: 100% (194/194), 161.21 KiB | 3.84 MiB/s, fertig.
+Löse Unterschiede auf: 100% (88/88), fertig.
+(venv) oem@oem-System-Product-Name:~/therock_test/amd-nvdiffrast-rocm72-gfx1201$ python ./amd_nvdiffrast_setup.py \
   --workdir ~/therock_test \
   --venv ~/therock_test/venv \
   --rocm-path /opt/rocm \
   --arch gfx1201 \
   --validation quick
-Klone nach 'amd-nvdiffrast-rocm72-gfx1201' …
-remote: Enumerating objects: 177, done.
-remote: Counting objects: 100% (177/177), done.
-remote: Compressing objects: 100% (174/174), done.
-remote: Total 177 (delta 81), reused 0 (delta 0), pack-reused 0 (from 0)
-Empfange Objekte: 100% (177/177), 127.26 KiB | 3.18 MiB/s, fertig.
-Löse Unterschiede auf: 100% (81/81), fertig.
 === AMD nvdiffrast ROCm72/gfx1201 final v52 setup ===
-workdir:    /home/oem/therock_test
-repo:       /home/oem/therock_test/nvdiffrast
-venv:       /home/oem/therock_test/venv
-bundle:     /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
-rocm path:  /opt/rocm
-arch:       gfx1201
-validation: quick
+workdir:     /home/oem/therock_test
+repo:        /home/oem/therock_test/nvdiffrast
+venv:        /home/oem/therock_test/venv
+bundle:      /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+rocm path:   /opt/rocm
+arch:        gfx1201
+validation:  quick
+
+=== Reproducibility metadata: setup start ===
+setup start UTC: 2026-07-11T17:40:14Z
+installer path:   /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201
+installer HEAD:   f25b5db30afc63b9d5f2fb8a2c4b2a7badcb9a80
+installer branch: main
+installer remote: https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
+installer state:  clean
 
 $ git clone https://github.com/NVlabs/nvdiffrast.git /home/oem/therock_test/nvdiffrast
 Klone nach '/home/oem/therock_test/nvdiffrast' …
@@ -29,8 +37,16 @@ remote: Enumerating objects: 523, done.
 remote: Counting objects: 100% (265/265), done.
 remote: Compressing objects: 100% (75/75), done.
 remote: Total 523 (delta 198), reused 190 (delta 190), pack-reused 258 (from 1)
-Empfange Objekte: 100% (523/523), 11.12 MiB | 10.50 MiB/s, fertig.
+Empfange Objekte: 100% (523/523), 11.12 MiB | 9.89 MiB/s, fertig.
 Löse Unterschiede auf: 100% (284/284), fertig.
+
+=== Reproducibility metadata: upstream baseline ===
+upstream nvdiffrast path:   /home/oem/therock_test/nvdiffrast
+upstream nvdiffrast HEAD:   253ac4fcea7de5f396371124af597e6cc957bfae
+upstream nvdiffrast branch: main
+upstream nvdiffrast remote: https://github.com/NVlabs/nvdiffrast.git
+upstream nvdiffrast state:  clean
+NOTE: The upstream identity above was captured before any v52 baseline or final-stack source modification.
 
 $ /home/oem/therock_test/venv/bin/python -c 
 import sys, torch
@@ -80,11 +96,11 @@ INFO: csrc/common/hipraster/impl fehlt. Erzeuge HIP-Struktur aus csrc/common/cud
 INFO: hipify-perl gefunden: /opt/rocm/bin/hipify-perl
 
 === Backup current hipraster/impl/*.inl ===
-'csrc/common/hipraster/impl/BinRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/BinRaster.inl'
-'csrc/common/hipraster/impl/CoarseRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/CoarseRaster.inl'
-'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/FineRaster.inl'
-'csrc/common/hipraster/impl/TriangleSetup.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/TriangleSetup.inl'
-'csrc/common/hipraster/impl/Util.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/Util.inl'
+'csrc/common/hipraster/impl/BinRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_194110/BinRaster.inl'
+'csrc/common/hipraster/impl/CoarseRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_194110/CoarseRaster.inl'
+'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_194110/FineRaster.inl'
+'csrc/common/hipraster/impl/TriangleSetup.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_194110/TriangleSetup.inl'
+'csrc/common/hipraster/impl/Util.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_194110/Util.inl'
 
 === Reset hipraster impl from cudaraster impl ===
 'csrc/common/cudaraster/impl/BinRaster.inl' -> 'csrc/common/hipraster/impl/BinRaster.inl'
@@ -216,13 +232,13 @@ Processing ./.
 
   Total number of replaced kernel launches: 0
   running dist_info
-  creating /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info
-  writing /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/PKG-INFO
-  writing dependency_links to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/dependency_links.txt
-  writing requirements to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/requires.txt
-  writing top-level names to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/top_level.txt
-  writing manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
-  reading manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
+  creating /tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info
+  writing /tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to /tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to /tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/requires.txt
+  writing top-level names to /tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/top_level.txt
+  writing manifest file '/tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file '/tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/SOURCES.txt'
   reading manifest template 'MANIFEST.in'
   warning: no previously-included files matching '*~' found anywhere in distribution
   warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
@@ -234,8 +250,8 @@ Processing ./.
   warning: no previously-included files matching 'build' found anywhere in distribution
   warning: no previously-included files matching 'dist' found anywhere in distribution
   adding license file 'LICENSE.txt'
-  writing manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
-  creating '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast-0.4.0.dist-info'
+  writing manifest file '/tmp/pip-modern-metadata-gqalqqv3/nvdiffrast.egg-info/SOURCES.txt'
+  creating '/tmp/pip-modern-metadata-gqalqqv3/nvdiffrast-0.4.0.dist-info'
   Preparing metadata (pyproject.toml) ... done
 Requirement already satisfied: numpy in /home/oem/therock_test/venv/lib/python3.12/site-packages (from nvdiffrast==0.4.0) (2.5.1)
 Building wheels for collected packages: nvdiffrast
@@ -356,7 +372,7 @@ Building wheels for collected packages: nvdiffrast
   Copying nvdiffrast.egg-info to build/bdist.linux-x86_64/wheel/./nvdiffrast-0.4.0-py3.12.egg-info
   running install_scripts
   creating build/bdist.linux-x86_64/wheel/nvdiffrast-0.4.0.dist-info/WHEEL
-  creating '/tmp/pip-ephem-wheel-cache-38dl3lt0/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmppu7hex4i/.tmp-rg69e17e/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+  creating '/tmp/pip-ephem-wheel-cache-fhu9_lz9/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmpvt5jsezt/.tmp-5hjto560/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
   adding '_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so'
   adding 'nvdiffrast/__init__.py'
   adding 'nvdiffrast/torch/__init__.py'
@@ -368,8 +384,8 @@ Building wheels for collected packages: nvdiffrast
   adding 'nvdiffrast-0.4.0.dist-info/RECORD'
   removing build/bdist.linux-x86_64/wheel
   Building wheel for nvdiffrast (pyproject.toml) ... done
-  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3503029 sha256=e9e108515d9f55885cb440ae96dabdff9222371ef9eb521d8a6e106899af374b
-  Stored in directory: /tmp/pip-ephem-wheel-cache-38dl3lt0/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
+  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3503029 sha256=de267e790b27e49cc7eb88334b46fbb0453573b100538186b5444eabfc5448a5
+  Stored in directory: /tmp/pip-ephem-wheel-cache-fhu9_lz9/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
 Successfully built nvdiffrast
 Installing collected packages: nvdiffrast
 Successfully installed nvdiffrast-0.4.0
@@ -409,7 +425,7 @@ Applying final stack...
 ================================================================
 APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_v36_wave32.sh
 ================================================================
-'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/FineRaster.inl.before_wave64_runtime_fix_v36_rdna_wave32.20260711_184020'
+'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/FineRaster.inl.before_wave64_runtime_fix_v36_rdna_wave32.20260711_194314'
 OK: inserted nvdr_ballot32_from_rowmask helper
 OK: updateTileZMax mask-aware
 OK: scan32_value mask-aware
@@ -568,7 +584,7 @@ Search for build-time regeneration/copy sources:
 /home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h:1:// !!! This is a file automatically generated by hipify!!!
 /home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h:1:// !!! This is a file automatically generated by hipify!!!
 /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip:1:// !!! This is a file automatically generated by hipify!!!
-/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/.ninja_log:12:47395	60402	1783787950198758245	/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o	65e464e0f453cea0
+/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/.ninja_log:12:47769	60659	1783791723399679453	/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o	65e464e0f453cea0
 /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/build.ninja:27:build /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o: cuda_compile /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip
 /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/build.ninja:37:build /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o: compile /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp
 /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
@@ -920,13 +936,13 @@ Processing ./.
 
   Total number of replaced kernel launches: 0
   running dist_info
-  creating /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info
-  writing /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/PKG-INFO
-  writing dependency_links to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/dependency_links.txt
-  writing requirements to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/requires.txt
-  writing top-level names to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/top_level.txt
-  writing manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
-  reading manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
+  creating /tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info
+  writing /tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to /tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to /tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/requires.txt
+  writing top-level names to /tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/top_level.txt
+  writing manifest file '/tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file '/tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/SOURCES.txt'
   reading manifest template 'MANIFEST.in'
   warning: no previously-included files matching '*~' found anywhere in distribution
   warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
@@ -938,8 +954,8 @@ Processing ./.
   warning: no previously-included files matching 'build' found anywhere in distribution
   warning: no previously-included files matching 'dist' found anywhere in distribution
   adding license file 'LICENSE.txt'
-  writing manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
-  creating '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast-0.4.0.dist-info'
+  writing manifest file '/tmp/pip-modern-metadata-9rtyz04v/nvdiffrast.egg-info/SOURCES.txt'
+  creating '/tmp/pip-modern-metadata-9rtyz04v/nvdiffrast-0.4.0.dist-info'
   Preparing metadata (pyproject.toml) ... done
 Requirement already satisfied: numpy in /home/oem/therock_test/venv/lib/python3.12/site-packages (from nvdiffrast==0.4.0) (2.5.1)
 Building wheels for collected packages: nvdiffrast
@@ -1060,7 +1076,7 @@ Building wheels for collected packages: nvdiffrast
   Copying nvdiffrast.egg-info to build/bdist.linux-x86_64/wheel/./nvdiffrast-0.4.0-py3.12.egg-info
   running install_scripts
   creating build/bdist.linux-x86_64/wheel/nvdiffrast-0.4.0.dist-info/WHEEL
-  creating '/tmp/pip-ephem-wheel-cache-1z_4ksyt/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmp_vsxjekl/.tmp-2atvu3vb/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+  creating '/tmp/pip-ephem-wheel-cache-vfvfwd3l/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmp33erdpar/.tmp-mj9p4kk8/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
   adding '_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so'
   adding 'nvdiffrast/__init__.py'
   adding 'nvdiffrast/torch/__init__.py'
@@ -1072,8 +1088,8 @@ Building wheels for collected packages: nvdiffrast
   adding 'nvdiffrast-0.4.0.dist-info/RECORD'
   removing build/bdist.linux-x86_64/wheel
   Building wheel for nvdiffrast (pyproject.toml) ... done
-  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3505155 sha256=1a190eec04cda495344717ec13915d28052e0a0a4bd180902518aa8b6937375c
-  Stored in directory: /tmp/pip-ephem-wheel-cache-1z_4ksyt/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
+  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3505155 sha256=c887c06dc60469232edc9c77423124df889fc6d3584db19312d2e66fb07ba340
+  Stored in directory: /tmp/pip-ephem-wheel-cache-vfvfwd3l/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
 Successfully built nvdiffrast
 Installing collected packages: nvdiffrast
 Successfully installed nvdiffrast-0.4.0
@@ -1155,7 +1171,7 @@ Teste 14 Pfad(e), Timeout=30s pro Pfad:
   -> OK (rc=0, 2.8s)
 
 --- antialias_forward_grid ---
-  -> OK (rc=0, 2.8s)
+  -> OK (rc=0, 2.9s)
 
 --- antialias_backward_color_direct ---
   -> OK (rc=0, 2.9s)
@@ -1193,53 +1209,53 @@ hashes=['explicit']
 res=[160, 180, 182, 192, 224, 256]
 
 [001/024] single res=160 color=interp hash=explicit
-    -> OK               rc=0 time=3.30s
+    -> OK               rc=0 time=3.32s
 [002/024] single res=180 color=interp hash=explicit
-    -> OK               rc=0 time=3.33s
-[003/024] single res=182 color=interp hash=explicit
-    -> OK               rc=0 time=3.33s
-[004/024] single res=192 color=interp hash=explicit
-    -> OK               rc=0 time=3.33s
-[005/024] single res=224 color=interp hash=explicit
-    -> OK               rc=0 time=3.33s
-[006/024] single res=256 color=interp hash=explicit
-    -> OK               rc=0 time=3.31s
-[007/024]  grid1 res=160 color=interp hash=explicit
-    -> OK               rc=0 time=3.35s
-[008/024]  grid1 res=180 color=interp hash=explicit
-    -> OK               rc=0 time=3.37s
-[009/024]  grid1 res=182 color=interp hash=explicit
-    -> OK               rc=0 time=3.36s
-[010/024]  grid1 res=192 color=interp hash=explicit
-    -> OK               rc=0 time=3.35s
-[011/024]  grid1 res=224 color=interp hash=explicit
-    -> OK               rc=0 time=3.35s
-[012/024]  grid1 res=256 color=interp hash=explicit
-    -> OK               rc=0 time=3.36s
-[013/024]  grid4 res=160 color=interp hash=explicit
-    -> OK               rc=0 time=3.37s
-[014/024]  grid4 res=180 color=interp hash=explicit
-    -> OK               rc=0 time=3.33s
-[015/024]  grid4 res=182 color=interp hash=explicit
     -> OK               rc=0 time=3.34s
+[003/024] single res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+[004/024] single res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.44s
+[005/024] single res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.46s
+[006/024] single res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.43s
+[007/024]  grid1 res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.40s
+[008/024]  grid1 res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.39s
+[009/024]  grid1 res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.44s
+[010/024]  grid1 res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.38s
+[011/024]  grid1 res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.41s
+[012/024]  grid1 res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.41s
+[013/024]  grid4 res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.41s
+[014/024]  grid4 res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.45s
+[015/024]  grid4 res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.40s
 [016/024]  grid4 res=192 color=interp hash=explicit
-    -> OK               rc=0 time=3.38s
+    -> OK               rc=0 time=3.43s
 [017/024]  grid4 res=224 color=interp hash=explicit
-    -> OK               rc=0 time=3.36s
+    -> OK               rc=0 time=3.40s
 [018/024]  grid4 res=256 color=interp hash=explicit
-    -> OK               rc=0 time=3.37s
+    -> OK               rc=0 time=3.41s
 [019/024] grid16 res=160 color=interp hash=explicit
-    -> OK               rc=0 time=3.37s
+    -> OK               rc=0 time=3.41s
 [020/024] grid16 res=180 color=interp hash=explicit
-    -> OK               rc=0 time=3.38s
+    -> OK               rc=0 time=3.43s
 [021/024] grid16 res=182 color=interp hash=explicit
-    -> OK               rc=0 time=3.35s
+    -> OK               rc=0 time=3.41s
 [022/024] grid16 res=192 color=interp hash=explicit
-    -> OK               rc=0 time=3.36s
+    -> OK               rc=0 time=3.39s
 [023/024] grid16 res=224 color=interp hash=explicit
-    -> OK               rc=0 time=3.38s
+    -> OK               rc=0 time=3.41s
 [024/024] grid16 res=256 color=interp hash=explicit
-    -> OK               rc=0 time=3.37s
+    -> OK               rc=0 time=3.39s
 
 ===== SUMMARY BY CASE =====
 single  res=160  color=interp  hash=explicit  OK
@@ -1281,7 +1297,7 @@ passed=24 failed_or_timeout=0 total=24
 AA grid bisect cases=72 timeout=30s
 
 [001/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.85s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=call
@@ -1291,7 +1307,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [002/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.86s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=sync
@@ -1302,7 +1318,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [003/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.84s
+    -> OK rc=0 time=2.89s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=finite
@@ -1314,7 +1330,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [004/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=2.91s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=diff
@@ -1337,7 +1353,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [006/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.79s
+    -> OK rc=0 time=2.84s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=sync
@@ -1348,7 +1364,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [007/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=2.88s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=finite
@@ -1360,7 +1376,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [008/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.90s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=diff
@@ -1373,7 +1389,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 4.172325134277344e-06 diff sum: 0.002106882631778717
       changed: 644
 [009/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.86s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=call
@@ -1383,7 +1399,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [010/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.82s
+    -> OK rc=0 time=2.85s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=sync
@@ -1394,7 +1410,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [011/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.84s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=finite
@@ -1406,7 +1422,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [012/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=2.98s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=diff
@@ -1419,7 +1435,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.18956458568572998 diff sum: 98.10213470458984
       changed: 652
 [013/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=call
@@ -1429,7 +1445,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [014/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.82s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=sync
@@ -1440,7 +1456,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [015/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=2.99s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=finite
@@ -1452,7 +1468,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [016/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=2.96s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=diff
@@ -1465,7 +1481,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.37812286615371704 diff sum: 411.59765625
       changed: 686
 [017/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=call
@@ -1475,7 +1491,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [018/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.95s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=sync
@@ -1486,7 +1502,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [019/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=2.98s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=finite
@@ -1498,7 +1514,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [020/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=3.00s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=diff
@@ -1511,7 +1527,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.3794693946838379 diff sum: 241.80322265625
       changed: 804
 [021/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.91s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=call
@@ -1521,7 +1537,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [022/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.91s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=sync
@@ -1532,7 +1548,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [023/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.84s
+    -> OK rc=0 time=2.94s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=finite
@@ -1544,7 +1560,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [024/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=2.97s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=diff
@@ -1557,7 +1573,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.1894502490758896 diff sum: 275.39581298828125
       changed: 918
 [025/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.90s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=call
@@ -1567,7 +1583,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [026/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.87s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=sync
@@ -1578,7 +1594,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [027/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.84s
+    -> OK rc=0 time=2.94s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=finite
@@ -1590,7 +1606,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [028/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=2.96s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=diff
@@ -1603,7 +1619,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 3.5762786865234375e-06 diff sum: 0.0016206689178943634
       changed: 566
 [029/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.89s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=call
@@ -1613,7 +1629,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [030/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=sync
@@ -1624,7 +1640,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [031/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.84s
+    -> OK rc=0 time=2.95s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=finite
@@ -1636,7 +1652,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [032/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=2.99s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=diff
@@ -1649,7 +1665,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 4.172325134277344e-06 diff sum: 0.002083834260702133
       changed: 636
 [033/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.92s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=call
@@ -1659,7 +1675,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [034/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.90s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=sync
@@ -1670,7 +1686,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [035/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.83s
+    -> OK rc=0 time=2.95s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=finite
@@ -1682,7 +1698,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [036/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.88s
+    -> OK rc=0 time=2.94s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=diff
@@ -1695,7 +1711,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.18956458568572998 diff sum: 98.10213470458984
       changed: 652
 [037/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.90s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=call
@@ -1705,7 +1721,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [038/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.94s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=sync
@@ -1716,7 +1732,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [039/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=2.99s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=finite
@@ -1728,7 +1744,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [040/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.88s
+    -> OK rc=0 time=3.01s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=diff
@@ -1741,7 +1757,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.37812289595603943 diff sum: 404.397705078125
       changed: 674
 [041/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.79s
+    -> OK rc=0 time=2.95s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=call
@@ -1751,7 +1767,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [042/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.97s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=sync
@@ -1762,7 +1778,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [043/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=3.01s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=finite
@@ -1774,7 +1790,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [044/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.05s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=diff
@@ -1787,7 +1803,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.3794693946838379 diff sum: 240.60321044921875
       changed: 800
 [045/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.96s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=call
@@ -1797,7 +1813,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [046/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.82s
+    -> OK rc=0 time=3.01s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=sync
@@ -1808,7 +1824,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [047/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.03s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=finite
@@ -1820,7 +1836,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [048/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.02s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=diff
@@ -1833,7 +1849,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.1894502490758896 diff sum: 272.995849609375
       changed: 910
 [049/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.82s
+    -> OK rc=0 time=2.95s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=call
@@ -1843,7 +1859,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [050/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.97s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=sync
@@ -1854,7 +1870,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [051/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.04s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=finite
@@ -1866,7 +1882,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [052/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=3.04s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=diff
@@ -1879,7 +1895,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 3.5762786865234375e-06 diff sum: 0.0015516020357608795
       changed: 542
 [053/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.99s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=call
@@ -1889,7 +1905,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [054/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.97s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=sync
@@ -1900,7 +1916,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [055/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=3.02s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=finite
@@ -1912,7 +1928,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [056/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.04s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=diff
@@ -1925,7 +1941,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 4.172325134277344e-06 diff sum: 0.0020056776702404022
       changed: 612
 [057/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.96s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=call
@@ -1935,7 +1951,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [058/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.98s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=sync
@@ -1946,7 +1962,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [059/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.86s
+    -> OK rc=0 time=3.07s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=finite
@@ -1958,7 +1974,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [060/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=3.04s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=diff
@@ -1971,7 +1987,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.18956458568572998 diff sum: 94.31414794921875
       changed: 626
 [061/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.80s
+    -> OK rc=0 time=2.88s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=call
@@ -1981,7 +1997,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [062/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.81s
+    -> OK rc=0 time=2.89s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=sync
@@ -1992,7 +2008,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [063/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.85s
+    -> OK rc=0 time=2.94s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=finite
@@ -2004,7 +2020,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [064/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.93s
+    -> OK rc=0 time=2.91s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=diff
@@ -2017,7 +2033,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.37812286615371704 diff sum: 379.19781494140625
       changed: 632
 [065/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.91s
+    -> OK rc=0 time=2.84s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=call
@@ -2027,7 +2043,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [066/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.88s
+    -> OK rc=0 time=2.83s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=sync
@@ -2038,7 +2054,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [067/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.93s
+    -> OK rc=0 time=2.88s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=finite
@@ -2050,7 +2066,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [068/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.91s
+    -> OK rc=0 time=2.89s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=diff
@@ -2063,7 +2079,7 @@ AA grid bisect cases=72 timeout=30s
       diff max: 0.3794693946838379 diff sum: 236.40316772460938
       changed: 786
 [069/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=call
-    -> OK rc=0 time=2.87s
+    -> OK rc=0 time=2.84s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=call
@@ -2073,7 +2089,7 @@ AA grid bisect cases=72 timeout=30s
       topology hash sync OK
       antialias call returned
 [070/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=sync
-    -> OK rc=0 time=2.88s
+    -> OK rc=0 time=2.84s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=sync
@@ -2084,7 +2100,7 @@ AA grid bisect cases=72 timeout=30s
       antialias call returned
       antialias sync OK
 [071/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=finite
-    -> OK rc=0 time=2.93s
+    -> OK rc=0 time=2.88s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=finite
@@ -2096,7 +2112,7 @@ AA grid bisect cases=72 timeout=30s
       antialias sync OK
       finite: True
 [072/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=diff
-    -> OK rc=0 time=2.96s
+    -> OK rc=0 time=2.90s
     stdout:
       torch=2.13.0+rocm7.2 hip=7.2.53211
       case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=diff
@@ -2110,82 +2126,91 @@ AA grid bisect cases=72 timeout=30s
       changed: 876
 
 ===== SUMMARY =====
-cells=1 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
-cells=1 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
-cells=1 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
-cells=1 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.85s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.86s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.89s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.91s
 cells=1 res=180 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.82s
-cells=1 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.79s
-cells=1 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
-cells=1 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.90s
-cells=1 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
-cells=1 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
-cells=1 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
-cells=1 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
-cells=1 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.83s
-cells=1 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
-cells=1 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
-cells=1 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
-cells=1 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
-cells=1 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.80s
-cells=1 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
-cells=1 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
-cells=1 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
-cells=1 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
-cells=1 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
-cells=1 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
-cells=4 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.83s
-cells=4 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
-cells=4 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
-cells=4 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
-cells=4 res=180 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
-cells=4 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
-cells=4 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
-cells=4 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
-cells=4 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
-cells=4 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
-cells=4 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.83s
-cells=4 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.88s
-cells=4 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
-cells=4 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
-cells=4 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
-cells=4 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.88s
-cells=4 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.79s
-cells=4 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
-cells=4 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
-cells=4 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
-cells=4 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
-cells=4 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
-cells=4 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.87s
-cells=4 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
-cells=16 res=160 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.82s
-cells=16 res=160 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
-cells=16 res=160 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.87s
-cells=16 res=160 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.85s
-cells=16 res=180 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.81s
-cells=16 res=180 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
-cells=16 res=180 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.86s
-cells=16 res=180 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.87s
-cells=16 res=182 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.81s
-cells=16 res=182 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.80s
-cells=16 res=182 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.86s
-cells=16 res=182 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.87s
-cells=16 res=192 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.80s
-cells=16 res=192 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
-cells=16 res=192 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.85s
-cells=16 res=192 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.93s
-cells=16 res=224 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.91s
-cells=16 res=224 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.88s
-cells=16 res=224 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.93s
-cells=16 res=224 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.91s
-cells=16 res=256 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.87s
-cells=16 res=256 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.88s
-cells=16 res=256 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.93s
-cells=16 res=256 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.96s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.84s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.88s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.92s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.86s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.85s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.92s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.98s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.92s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.92s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.99s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.96s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.92s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.95s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.98s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=3.00s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.91s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.91s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.94s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.97s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.90s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.87s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.94s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.96s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.89s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.92s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.95s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.99s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.92s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.90s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.95s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.94s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.90s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.94s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.99s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=3.01s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.95s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.97s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=3.01s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=3.05s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.96s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=3.01s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=3.03s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=3.02s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.95s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.97s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=3.04s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=3.04s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.99s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.97s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=3.02s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=3.04s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.96s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.98s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=3.07s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=3.04s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.88s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.89s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.94s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.91s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.84s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.83s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.88s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.89s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.84s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.84s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.88s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.90s
 
 passed=72 failed=0 total=72
 
 v52 validation completed.
+
+=== Reproducibility summary ===
+setup start UTC:         2026-07-11T17:40:14Z
+setup end UTC:           2026-07-11T17:50:47Z
+elapsed seconds:         633.703
+installer git HEAD:      f25b5db30afc63b9d5f2fb8a2c4b2a7badcb9a80
+installer git state:     clean
+upstream git HEAD:       253ac4fcea7de5f396371124af597e6cc957bfae
+upstream baseline state: clean
 
 === DONE ===
 Patched nvdiffrast is installed in: /home/oem/therock_test/venv
@@ -2196,3 +2221,4 @@ Recommended commands:
   cd "/home/oem/therock_test/nvdiffrast" && grep -c "v47 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
   cd "/home/oem/therock_test/nvdiffrast" && grep -c "v51 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
   cd "/home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests" && ./run_v52_validation.sh
+(venv) oem@oem-System-Product-Name:~/therock_test/amd-nvdiffrast-rocm72-gfx1201$ 
