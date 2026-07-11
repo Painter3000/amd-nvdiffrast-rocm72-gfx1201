@@ -1,203 +1,426 @@
-# AMD nvdiffrast ROCm 7.2 / RDNA4 gfx1201 final v52 Patch Stack
+# AMD nvdiffrast ROCm 7.2 / RDNA4 gfx1201 — final v52 patch stack
 
-Community ROCm 7.2 / RDNA4 gfx1201 patch stack for `NVlabs/nvdiffrast`.
+Community patch, build and validation bundle for running [`NVlabs/nvdiffrast`](https://github.com/NVlabs/nvdiffrast) on AMD RDNA4 / `gfx1201` with ROCm 7.2.
 
-This repository is a patch and installer bundle for building `nvdiffrast` on
-AMD RDNA4 / gfx1201 with ROCm 7.2. It is **not** a standalone replacement for
-the upstream `NVlabs/nvdiffrast` source tree.
+> [!IMPORTANT]
+> This repository is **not** a standalone fork or replacement for the upstream nvdiffrast source tree.  
+> It clones upstream nvdiffrast, creates a ROCm/HIP-compatible runtime baseline, applies the final v52 patch stack, performs a clean rebuild and runs validation.
 
-The setup flow is:
+The supported setup flow is:
 
 ```text
-clone NVlabs/nvdiffrast
-→ create the ROCm/HIP runtime baseline
-→ apply the final v52 patch stack
-→ clean rebuild
-→ verify v47/v51 markers after hipify
-→ run validation tests
+clone upstream nvdiffrast
+→ generate ROCm/HIP runtime baseline
+→ initial baseline build
+→ apply final v52 patch stack
+→ clean final rebuild
+→ verify patch markers after hipify
+→ run validation
 ```
 
 ---
 
 ## Status
 
-Current validated stack: **final v52**
+**Current validated stack:** final v52  
+**Fresh-host validation:** passed on 2026-07-11  
+**Fresh-host quick-validation result:** **110 / 110 checks passed**
 
-Validated environment:
+### Fresh-host validated environment
+
+| Component | Validated value |
+|---|---|
+| Operating system | Ubuntu 24.04 |
+| GPU | AMD Radeon AI PRO R9700 |
+| Architecture | RDNA4 / `gfx1201` |
+| Python | 3.12.3 |
+| PyTorch | `2.13.0+rocm7.2` |
+| HIP reported by PyTorch | `7.2.53211` |
+| Triton | `triton-rocm 3.7.1` |
+| NumPy | `2.5.1` |
+| Ninja | `1.13.0` |
+| nvdiffrast | `0.4.0` |
+| ROCm path | `/opt/rocm` |
+
+PyTorch reported the generic device name `AMD Radeon Graphics`; the build still targeted the correct GPU explicitly through:
 
 ```text
-GPU:        AMD Radeon AI PRO R9700 / gfx1201 / RDNA4
-PyTorch:    2.12.0+rocm7.2
-HIP:        7.2.53211
-nvdiffrast: 0.4.0
-Python:     3.10.x
-ROCm arch:  gfx1201
+PYTORCH_ROCM_ARCH=gfx1201
 ```
 
-Current validation summary:
+### Fresh-host evidence
+
+- [Fresh-host validation report](docs/validation/fresh-host-ubuntu24.04-rocm72-gfx1201-v52.md)
+- [Complete raw installation and validation log](docs/validation/logs/fresh-host-ubuntu24.04-rocm72-gfx1201-v52-full.log)
+
+### Fresh-host quick-validation summary
+
+| Validation group | Passed | Failed |
+|---|---:|---:|
+| Path probe | 14 | 0 |
+| Antialias forward matrix | 24 | 0 |
+| Antialias backward/gradient matrix | 72 | 0 |
+| **Total** | **110** | **0** |
+
+### Extended development validation
+
+These extended tests were performed separately from the fresh-host quick run:
 
 ```text
-nvdiffrast_path_probe_v1.py:
-  passed=14 failed_or_timeout=0 total=14
-
 AA forward statistical matrix:
   aa_matrix_stat_probe.py --runs 20
-  480/480 passed
-  24/24 cases with 100% success
-
-AA backward / gradient matrix:
-  cells=1,4,16
-  res=160,180,182,192,224,256
-  stages=call,sync,finite,diff
-  passed=72 failed=0 total=72
+  480 / 480 passed
+  24 / 24 cases with 100% success
 
 AA backward_pos statistical probe:
   aa_backward_pos_stat_probe_v52.py --runs 20
-  cells=1,4,16, res=160,180,182,192,224,256
-  passed=360 failed=0 total=360
-  18/18 cases with 100% success over 20 runs
+  cells=1,4,16
+  resolutions=160,180,182,192,224,256
+  360 / 360 passed
+  18 / 18 cases with 100% success
 ```
 
-Validated paths include:
+Validated functionality includes:
+
+- extension import and loading,
+- minimal and grid rasterization forward,
+- rasterize/interpolate position gradients,
+- interpolate color gradients,
+- finite-difference gradient checks,
+- topology-hash construction,
+- antialias forward for single-triangle and grid cases,
+- antialias backward for color and position,
+- texture forward and backward,
+- repeated statistical antialias validation over critical resolutions.
+
+---
+
+## What the automated installer does
+
+`amd_nvdiffrast_setup.py` performs the complete supported process:
+
+1. Uses or clones a clean upstream `NVlabs/nvdiffrast` source tree.
+2. Verifies that the selected virtual environment contains a working ROCm-enabled PyTorch.
+3. Generates the v52 ROCm runtime-baseline bundle.
+4. Applies baseline compatibility fixes required before the first hipify/build.
+5. Performs an initial baseline build and import smoke test.
+6. Applies the canonical final v52 patch stack.
+7. Removes old build artifacts and performs a second, clean final build.
+8. Verifies v47 and v51 markers in both source and hipified files.
+9. Rejects active diagnostic patches or hard synchronization experiments.
+10. Runs the selected validation level.
+
+### Why there are two builds
+
+The two builds have different purposes:
 
 ```text
-- import and extension loading
-- minimal rasterize forward
-- grid rasterize forward
-- rasterize/interpolate backward position gradients
-- interpolate forward and backward color gradients
-- smooth interior finite-difference rasterize/interpolate gradient check
-- topology hash construction
-- antialias forward single-triangle and grid cases
-- antialias backward color direct
-- antialias backward position-grid cases
-- antialias forward matrix stress over critical resolutions
-- antialias backward/grad matrix over cells=1,4,16 and res=160..256
-- antialias backward_pos statistical probe (real .backward(), 20 runs, 360/360 passed) over cells=1,4,16 and res=160..256
-- basic texture forward and backward
+Build 1:
+  creates and verifies the ROCm/HIP runtime baseline,
+  generates hipified files,
+  and proves that the upstream-derived baseline can compile and import.
+
+Build 2:
+  recompiles the fully patched final v52 source tree from scratch,
+  prevents stale object reuse,
+  verifies hipify regeneration,
+  and produces the final installed extension.
 ```
+
+Without the second clean build, the installed shared library could still represent the baseline rather than the complete final patch stack.
+
+---
+
+## Prerequisites
+
+The setup script does **not** install ROCm, create the virtual environment or install PyTorch.
+
+Required before running it:
+
+- Ubuntu 24.04 or a compatible Linux distribution,
+- ROCm 7.2 installed under `/opt/rocm`, or a custom path passed with `--rocm-path`,
+- an AMD RDNA4 / `gfx1201` GPU with a working amdgpu/KFD stack,
+- the current user in the appropriate `video` and `render` groups,
+- Python 3.12,
+- Git and standard native build tools,
+- a working ROCm-enabled PyTorch installation.
+
+Example Ubuntu packages:
+
+```bash
+sudo apt update
+sudo apt install -y \
+  git \
+  build-essential \
+  python3.12 \
+  python3.12-venv \
+  python3-dev \
+  ninja-build
+```
+
+ROCm itself must already be installed and functional.
+
+---
+
+## Quick start
+
+### 1. Create the virtual environment
+
+```bash
+mkdir -p ~/therock_test
+python3.12 -m venv ~/therock_test/venv
+source ~/therock_test/venv/bin/activate
+
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install ninja numpy
+```
+
+### 2. Install ROCm PyTorch
+
+Exact validated major/minor release:
+
+```bash
+python -m pip install "torch==2.13.0" \
+  --index-url https://download.pytorch.org/whl/rocm7.2
+```
+
+An unpinned installation from the ROCm 7.2 index may install a newer release later; that newer combination is not covered by the validation report above.
+
+Verify PyTorch before continuing:
+
+```bash
+python - <<'PY'
+import torch
+
+print("Torch:", torch.__version__)
+print("HIP:", torch.version.hip)
+print("CUDA API available:", torch.cuda.is_available())
+
+if not torch.cuda.is_available():
+    raise SystemExit("ROCm PyTorch is not working")
+
+print("Device:", torch.cuda.get_device_name(0))
+PY
+```
+
+Expected for the validated setup:
+
+```text
+Torch: 2.13.0+rocm7.2
+HIP: 7.2.53211
+CUDA API available: True
+```
+
+PyTorch uses the `torch.cuda` API for both CUDA and ROCm backends; `True` is therefore expected on a working ROCm installation.
+
+### 3. Clone this installer repository
+
+```bash
+cd ~/therock_test
+git clone https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
+cd amd-nvdiffrast-rocm72-gfx1201
+```
+
+Do **not** run `pip install .` in this repository. It is a patch and installer bundle, not the upstream nvdiffrast package.
+
+### 4. Run the complete setup
+
+Recommended fresh-host command:
+
+```bash
+python ./amd_nvdiffrast_setup.py \
+  --workdir ~/therock_test \
+  --venv ~/therock_test/venv \
+  --rocm-path /opt/rocm \
+  --arch gfx1201 \
+  --validation quick
+```
+
+The default nvdiffrast checkout will be created at:
+
+```text
+~/therock_test/nvdiffrast
+```
+
+The generated runtime bundle will be created at:
+
+```text
+~/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+```
+
+### Stronger validation
+
+```bash
+python ./amd_nvdiffrast_setup.py \
+  --workdir ~/therock_test \
+  --venv ~/therock_test/venv \
+  --rocm-path /opt/rocm \
+  --arch gfx1201 \
+  --validation full
+```
+
+### Validation levels
+
+| Level | Behavior |
+|---|---|
+| `none` | Build only |
+| `quick` | Marker integrity plus the v52 validation wrapper |
+| `full` | Quick validation plus the 20-run forward-AA statistical matrix |
+| `stress` | Full validation plus the additional stress wrappers |
+
+`--skip-tests` is an alias for `--validation none`.
+
+### Other useful options
+
+```text
+--repo PATH          existing or target nvdiffrast checkout
+--bundle-dir PATH    generated runtime bundle location
+--repo-url URL       custom upstream nvdiffrast repository
+--branch NAME        optional upstream branch or tag
+--max-jobs N         native build parallelism; default 1
+--skip-clone         require an already existing nvdiffrast checkout
+```
+
+---
+
+## Fresh-host compatibility fixes discovered during validation
+
+The clean Ubuntu 24.04 / Python 3.12 installation exposed several prerequisites that had previously existed only implicitly on the development machine.
+
+The generator now applies these before the initial baseline build:
+
+| Fix | Purpose |
+|---|---|
+| `NVDR_ROCM_AA_BALLOT64` | Uses a 64-bit HIP ballot mask in `antialias.cu` |
+| `NVDR_ROCM_INTERP_ALLSYNC64` | Uses a 64-bit HIP `all_sync` mask in `interpolate.cu` |
+| `NVDR_ROCM_FRCP_RZ` | Provides ROCm-compatible round-toward-zero reciprocal behavior |
+| `evHashElements` narrowing fix | Avoids Clang/C++20 unsigned-to-signed braced-initializer narrowing |
+| `NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK` | Prevents CUDA and HIP PyTorch headers from entering the same texture wrapper translation unit |
+| `C10_CUDA_NO_CMAKE_CONFIGURE_FILE` | Avoids a missing PyTorch CMake-generated CUDA header in ROCm wheels |
+| ROCm-safe rasterizer helpers | Replaces CUDA/PTX-only helper paths |
+| TriangleSetup reconstruction | Restores required result values after HIP conversion |
+| FineRaster initialization | Ensures deterministic baseline initialization |
+
+The final patch wrapper also executes every patch from the nvdiffrast repository directory, because several patch scripts use paths relative to the upstream source tree.
 
 ---
 
 ## Canonical final v52 patch stack
 
-The final patch stack is applied in this order:
+The final stack is applied in this order:
 
-```text
-v36    patch_rocm_v36_wave32.sh
-v38    patch_antialias_grad_rocm_wave32_v38.sh
-v38b   patch_antialias_grad_rocm_wave32_v38b_gradpos_guard.sh
-v39b   patch_antialias_persistent_loop_v39b.sh
-v40f   patch_active_hip_antialias_fwd_bounds_v40f_patch_cu_and_hip.sh
-v41c   patch_clang_antialias_evhash_narrowing_v41c.sh
-v41m2  patch_rocm_interpolate_emptywarp_allsync_fix_v41m2.sh
-v45    patch_remove_numcta_override_v45.sh
-v47    patch_v47_native_workbuffer_zero.sh
-v51    patch_v51_antialias_grad_workbuffer_y_zero.sh
-```
+| Version | Script | Purpose |
+|---|---|---|
+| v36 | `patch_rocm_v36_wave32.sh` | FineRaster RDNA Wave32 runtime fix |
+| v38 | `patch_antialias_grad_rocm_wave32_v38.sh` | AntialiasGrad ROCm Wave32 fix |
+| v38b | `patch_antialias_grad_rocm_wave32_v38b_gradpos_guard.sh` | GradPos guard |
+| v39b | `patch_antialias_persistent_loop_v39b.sh` | Persistent-loop guard |
+| v40f | `patch_active_hip_antialias_fwd_bounds_v40f_patch_cu_and_hip.sh` | Antialias forward bounds guards |
+| v41c | `patch_clang_antialias_evhash_narrowing_v41c.sh` | Clang `evHash` narrowing fix |
+| v41m2 | `patch_rocm_interpolate_emptywarp_allsync_fix_v41m2.sh` | Interpolate empty-warp `all_sync` fix |
+| v45 | `patch_remove_numcta_override_v45.sh` | Remove or verify absence of the debug `numCTA = 1` override |
+| v47 | `patch_v47_native_workbuffer_zero.sh` | Forward work-buffer native zero initialization |
+| v51 | `patch_v51_antialias_grad_workbuffer_y_zero.sh` | Backward/Grad work-buffer Y-counter native zero initialization |
 
-Use the wrapper:
-
-```bash
-bash patches/apply_final_rocm72_gfx1201_v52.sh
-```
-
-Diagnostic or failed-control patches are intentionally **not** part of the final
-stack:
+Diagnostic and failed-control patches are intentionally excluded:
 
 ```text
 v48
 v49
 v50
-v50a / v50b
-v51 device-sync diagnostics
+v50a
+v50b
+v51 device-wide synchronization diagnostics
 ```
+
+Do not reintroduce them as final fixes.
+
+### v45 on a clean upstream tree
+
+Current upstream nvdiffrast does not contain the old manual debug line:
+
+```cpp
+numCTA = 1;
+```
+
+Therefore v45 normally reports the source as **already clean** and verifies that the analysis kernel uses the full:
+
+```text
+numCTA * numSM
+```
+
+launch grid. On an older manually modified development tree, it removes the override.
 
 ---
 
 ## Core technical findings
 
-### v36: FineRaster RDNA Wave32 fix
+### v36: FineRaster RDNA Wave32 execution model
 
-The original `nvdiffrast` FineRaster kernel assumes CUDA-style Warp32 behavior.
-For RDNA4 / gfx1201, the correct runtime model is not a Wave64 upper/lower-half
-split. Each `threadIdx.y` row must be treated as an independent native Wave32
-execution group.
+The original FineRaster code assumes CUDA Warp32 behavior.
 
-The final v36 FineRaster fix uses:
+For RDNA4 / `gfx1201`, each `threadIdx.y` row must be handled as its own native Wave32 execution group:
 
 ```cpp
 const U32 nvdr_rowShift = 0u;
 const U64 nvdr_rowMask  = 0x00000000ffffffffull;
 ```
 
-Do **not** use this incorrect Wave64 half-split model for RDNA/gfx1201:
+Do not use a synthetic Wave64 upper/lower-half split:
 
 ```cpp
 const U32 nvdr_rowShift = (U32)((threadIdx.y & 1) << 5);
 const U64 nvdr_rowMask  = (threadIdx.y & 1)
-                         ? 0xffffffff00000000ull
-                         : 0x00000000ffffffffull;
+                       ? 0xffffffff00000000ull
+                       : 0x00000000ffffffffull;
 ```
 
 The critical rule is:
 
 ```text
-A mask passed to __syncwarp() or __ballot_sync() must describe the lanes that
-actually participate.
+A mask passed to __syncwarp() or __ballot_sync()
+must describe the lanes that actually participate.
 ```
 
 ### v41m2: Interpolate empty-warp fix
 
-The interpolate path previously had a crash pattern at certain resolutions,
-especially around cases where `width % 8 == 4`.
+The interpolate path showed resolution-dependent failures, especially around edge-lane patterns such as `width % 8 == 4`.
 
-The final v41m2 fix disables the problematic ROCm/HIP empty-warp
-`__all_sync` shortcut while leaving the CUDA path unchanged:
+The final ROCm path avoids the unsafe full-mask empty-warp shortcut after edge lanes may already have returned, while the CUDA path remains unchanged.
 
-```cpp
-#if defined(__HIP_PLATFORM_AMD__) || defined(__HIPCC__)
-    // v41m2 ROCm/RDNA fix:
-    // Do not use the full-mask empty-warp shortcut after edge lanes may have returned.
-    // The normal triValid=false path below still writes zero output for live lanes.
-    if (false)
-#else
-    if (__all_sync(0xffffffffffffffffull, !triValid))
-#endif
-```
+### v47: Antialias forward work-buffer initialization
 
-### v47: Antialias forward workBuffer fix
-
-The antialias forward crash was traced to raw HIP memset usage on a PyTorch-owned
-`work_buffer` allocation:
+The forward failure was traced to raw asynchronous HIP memset on a PyTorch-owned allocation:
 
 ```cpp
 hipMemsetAsync(p.workBuffer, 0, sizeof(int4), stream)
 ```
 
-The final v47 fix replaces this in the ROCm path with a torch-native operation:
+The final ROCm path uses a PyTorch-native operation:
 
 ```cpp
 work_buffer.narrow(0, 0, 4).zero_();
 ```
 
-### v51: Antialias backward / grad workBuffer fix
+### v51: Antialias backward/gradient work-buffer initialization
 
-The remaining antialias backward/grad raw memset was:
+The remaining raw backward/gradient memset was:
 
 ```cpp
 hipMemsetAsync(&p.workBuffer[0].y, 0, sizeof(int), stream)
 ```
 
-The final v51 fix applies the same torch-native principle:
+The final fix applies the same PyTorch-native principle:
 
 ```cpp
 work_buffer.narrow(0, 1, 1).zero_();
 ```
 
-### Important hipify / rebuild caveat
+---
 
-A clean rebuild can regenerate:
+## Hipify and rebuild integrity
+
+A clean build can regenerate:
 
 ```text
 csrc/torch/torch_antialias_hip.cpp
@@ -209,20 +432,20 @@ from:
 csrc/torch/torch_antialias.cpp
 ```
 
-through hipify.
+Therefore fixes that must survive hipify need to be present in the source file and verified in the generated HIP file.
 
-Therefore v47 and v51 must patch both files:
-
-```text
-csrc/torch/torch_antialias.cpp
-csrc/torch/torch_antialias_hip.cpp
-```
-
-Always verify after a clean rebuild:
+After the final clean rebuild, the expected marker counts are:
 
 ```bash
-grep -c "v47 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
-grep -c "v51 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
+cd ~/therock_test/nvdiffrast
+
+grep -c "v47 FIX" \
+  csrc/torch/torch_antialias.cpp \
+  csrc/torch/torch_antialias_hip.cpp
+
+grep -c "v51 FIX" \
+  csrc/torch/torch_antialias.cpp \
+  csrc/torch/torch_antialias_hip.cpp
 ```
 
 Expected:
@@ -232,10 +455,11 @@ v47: 1 / 1
 v51: 1 / 1
 ```
 
-No diagnostic markers or hard-sync experiments should remain active:
+No diagnostic markers or hard synchronization experiments should remain active:
 
 ```bash
-grep -n "v46\|v48\|v49\|v50\|hipStreamSynchronize\|hipDeviceSynchronize\|cudaStreamSynchronize\|cudaDeviceSynchronize" \
+grep -n \
+  "v46\|v48\|v49\|v50\|hipStreamSynchronize\|hipDeviceSynchronize\|cudaStreamSynchronize\|cudaDeviceSynchronize" \
   csrc/torch/torch_antialias.cpp \
   csrc/torch/torch_antialias_hip.cpp || true
 ```
@@ -244,166 +468,36 @@ Expected: no output.
 
 ---
 
-## Installation
-
-### Prerequisites
-
-The setup script does **not** create the Python virtual environment and does
-**not** install PyTorch. Before running the setup, the following must already
-be in place:
-
-```text
-- ROCm 7.2 installed under /opt/rocm (or pass a custom --rocm-path)
-- An AMD RDNA4 / gfx1201 GPU with working amdgpu/KFD driver
-  (the current user should be in the video and render groups)
-- Python 3.10.x
-- git and standard build tools
-```
-
-Create the venv and install ROCm PyTorch first:
-
-```bash
-mkdir -p ~/therock_test
-python3.10 -m venv ~/therock_test/venv
-source ~/therock_test/venv/bin/activate
-
-pip install --upgrade pip
-pip install torch --index-url https://download.pytorch.org/whl/rocm7.2
-```
-
-Verify that ROCm PyTorch works before continuing:
-
-```bash
-python -c "import torch; print(torch.__version__, torch.version.hip, torch.cuda.is_available())"
-```
-
-Expected: a `+rocm7.2` torch version, a HIP version string, and `True`.
-The setup script performs the same check and aborts if `torch.cuda.is_available()`
-returns `False`.
-
-Validated with `torch 2.12.0+rocm7.2`. If your PyTorch/ROCm distribution comes
-from a different source (e.g. TheRock nightly builds), any venv with a working
-ROCm-enabled PyTorch for gfx1201 is fine — pass its path via `--venv`.
-
-### Recommended setup command
-
-Do **not** install this repository directly with `pip install`.
-
-This repository is a patch/installer bundle. It clones and patches upstream
-`NVlabs/nvdiffrast`.
-
-```bash
-git clone https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
-cd amd-nvdiffrast-rocm72-gfx1201
-
-python ./amd_nvdiffrast_setup.py \
-  --workdir ~/therock_test \
-  --venv ~/therock_test/venv \
-  --rocm-path /opt/rocm \
-  --arch gfx1201 \
-  --validation quick
-```
-
-For a stronger release check:
-
-```bash
-python ./amd_nvdiffrast_setup.py \
-  --workdir ~/therock_test \
-  --venv ~/therock_test/venv \
-  --rocm-path /opt/rocm \
-  --arch gfx1201 \
-  --validation full
-```
-
-Validation levels:
-
-```text
-none    build only
-quick   marker check + v52 validation wrapper
-full    quick + forward AA statistical probe
-stress  full + additional stress wrappers
-```
-
-### Manual patch-stack flow
-
-```bash
-git clone https://github.com/NVlabs/nvdiffrast.git ~/therock_test/nvdiffrast
-
-cd ~/therock_test/amd-nvdiffrast-rocm72-gfx1201
-
-REPO=~/therock_test/nvdiffrast \
-PATCH_DIR=~/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches \
-bash patches/apply_final_rocm72_gfx1201_v52.sh
-```
-
-Then clean rebuild:
-
-```bash
-source ~/therock_test/venv/bin/activate
-cd ~/therock_test/nvdiffrast
-
-pip uninstall -y nvdiffrast
-
-SITE="$HOME/therock_test/venv/lib/python3.10/site-packages"
-rm -rf "$SITE"/nvdiffrast
-rm -rf "$SITE"/nvdiffrast-*.dist-info
-rm -rf "$SITE"/__editable__*nvdiffrast*
-rm -f  "$SITE"/_nvdiffrast_c*.so
-
-rm -rf build/ dist/ ./*.egg-info
-find . -name "*.o" -delete
-find . -name "*.so" -delete
-find . -name "*.d" -delete
-find . -name "__pycache__" -type d -prune -exec rm -rf {} +
-
-export CC=/opt/rocm/llvm/bin/clang
-export CXX=/opt/rocm/llvm/bin/clang++
-export PYTORCH_ROCM_ARCH=gfx1201
-export FORCE_CUDA=1
-export MAX_JOBS=1
-export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
-
-python -m pip install . --no-build-isolation --no-cache-dir -v
-```
-
-Note about CPATH when following the manual flow:
-
-The `nvdiffrast_rocm_cuda_compat` directory referenced in `CPATH` is created by
-the automated generator (`scripts/nvdiffrast_rocm72_bundle_v52_generator.sh`) when
-you use the recommended setup flow. If you apply the patches and rebuild
-manually without running the generator, you will likely see missing-header
-errors unless you create or populate that compatibility directory yourself.
-
-Options when following the manual path:
-- Run the generator instead (recommended) to produce `nvdiffrast_rocm_cuda_compat`.
-- Manually create `~/therock_test/nvdiffrast_rocm_cuda_compat` and copy the
-  required compatibility headers into it (these are small helper headers used
-  to compile against ROCm/HIP).
-- Adjust `CPATH` to point at whatever headers you have prepared.
-
----
-
 ## Validation
 
-Quick validation:
+Activate the validated environment first:
+
+```bash
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/amd-nvdiffrast-rocm72-gfx1201
+```
+
+### Complete quick suite
+
+```bash
+REPO=~/therock_test/nvdiffrast \
+./tests/run_v52_validation.sh
+```
+
+### Marker-only validation
+
+```bash
+REPO=~/therock_test/nvdiffrast \
+./tests/test_v52_marker_integrity.sh
+```
+
+### Forward-AA statistical validation
 
 ```bash
 cd tests
-./run_v52_validation.sh
-```
 
-Marker-only validation:
-
-```bash
-REPO=~/therock_test/nvdiffrast ./tests/test_v52_marker_integrity.sh
-```
-
-Forward AA statistical validation:
-
-```bash
-cd tests
-
-python ./aa_matrix_stat_probe.py --runs 20 \
+python ./aa_matrix_stat_probe.py \
+  --runs 20 \
   --shapes single,grid1,grid4,grid16 \
   --res-list 160,180,182,192,224,256 \
   --colors interp \
@@ -411,12 +505,13 @@ python ./aa_matrix_stat_probe.py --runs 20 \
   --label "final v52 forward AA"
 ```
 
-Backward / gradient AA validation:
+### Backward/gradient matrix
 
 ```bash
 cd tests
 
-AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 \
+AMD_SERIALIZE_KERNEL=3 \
+TORCH_DISABLE_ADDR2LINE=1 \
 python ./test_antialias_backward_matrix_v52.py \
   --timeout 30 \
   --cells-list 1,4,16 \
@@ -428,13 +523,15 @@ python ./test_antialias_backward_matrix_v52.py \
   --verbose
 ```
 
-Backward position-gradient statistical validation:
+### Real backward position-gradient statistical validation
 
 ```bash
 cd tests
 
-AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 \
-python ./aa_backward_pos_stat_probe_v52.py --runs 20 \
+AMD_SERIALIZE_KERNEL=3 \
+TORCH_DISABLE_ADDR2LINE=1 \
+python ./aa_backward_pos_stat_probe_v52.py \
+  --runs 20 \
   --cells-list 1,4,16 \
   --res-list 160,180,182,192,224,256 \
   --topos explicit \
@@ -445,22 +542,171 @@ python ./aa_backward_pos_stat_probe_v52.py --runs 20 \
   --label "final v52 AA backward_pos statistical probe"
 ```
 
-**Note:** The preceding backward/grad block tests only setup/data paths
-(call, sync, finite, diff) without triggering a real `.backward()` call.
-This backward_pos block is the only test that actually calls `loss.backward()`
-and reads back `pos.grad`, repeated over 20 runs to exclude run-to-run
-non-determinism.
+The setup/data matrix stages `call`, `sync`, `finite` and `diff` do not by themselves represent a real `.backward()` call. The `backward_pos` statistical probe explicitly calls `loss.backward()` and reads `pos.grad`.
 
 ---
 
-## HIP crash hygiene
+## Advanced manual flow
 
-After any hardware trap, unspecified launch failure, illegal address, or
-`HSA_STATUS_ERROR_EXCEPTION`, start a fresh shell or at least a fresh Python
-process before testing again. HIP context state can be poisoned after a
-device-side failure.
+> [!WARNING]
+> Do not apply only the final patch stack directly to a fresh upstream clone.  
+> A fresh tree first requires the generated ROCm runtime baseline and its initial build.
 
-Useful debugging environment:
+The automated installer is the supported route. The following is mainly for debugging or development.
+
+### 1. Define paths
+
+```bash
+export ROOT="$HOME/therock_test"
+export INSTALLER="$ROOT/amd-nvdiffrast-rocm72-gfx1201"
+export REPO="$ROOT/nvdiffrast"
+export VENV="$ROOT/venv"
+export BUNDLE_DIR="$ROOT/nvdiffrast_rocm72_gfx1201_final_v52_bundle"
+export ROCM_PATH="/opt/rocm"
+```
+
+### 2. Clone upstream if needed
+
+```bash
+git clone https://github.com/NVlabs/nvdiffrast.git "$REPO"
+```
+
+### 3. Generate the runtime-baseline bundle
+
+```bash
+BUNDLE_DIR="$BUNDLE_DIR" \
+bash "$INSTALLER/scripts/nvdiffrast_rocm72_bundle_v52_generator.sh"
+```
+
+### 4. Apply the baseline and perform the initial build
+
+```bash
+ROOT="$ROOT" \
+REPO="$REPO" \
+VENV="$VENV" \
+BUNDLE_DIR="$BUNDLE_DIR" \
+ROCM_PATH="$ROCM_PATH" \
+MODE=runtime \
+PYTORCH_ROCM_ARCH=gfx1201 \
+FORCE_CUDA=1 \
+MAX_JOBS=1 \
+bash "$BUNDLE_DIR/reinstall_nvdiffrast_rocm72_gfx1201.sh"
+```
+
+### 5. Apply the canonical final stack
+
+```bash
+REPO="$REPO" \
+PATCH_DIR="$INSTALLER/patches" \
+bash "$INSTALLER/patches/apply_final_rocm72_gfx1201_v52.sh"
+```
+
+The wrapper changes into `$REPO` for each patch invocation, because most patch scripts use paths relative to the nvdiffrast source tree.
+
+### 6. Perform the clean final rebuild
+
+```bash
+source "$VENV/bin/activate"
+cd "$REPO"
+
+python -m pip uninstall -y nvdiffrast || true
+
+SITE="$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
+
+rm -rf "$SITE"/nvdiffrast
+rm -rf "$SITE"/nvdiffrast-*.dist-info
+rm -rf "$SITE"/__editable__*nvdiffrast*
+rm -f  "$SITE"/_nvdiffrast_c*.so
+
+rm -rf build/ dist/ ./*.egg-info
+find . -name "*.o" -delete
+find . -name "*.so" -delete
+find . -name "*.d" -delete
+find . -name "__pycache__" -type d -prune -exec rm -rf {} +
+
+export CC="$ROCM_PATH/llvm/bin/clang"
+export CXX="$ROCM_PATH/llvm/bin/clang++"
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$ROOT/nvdiffrast_rocm_cuda_compat:$ROCM_PATH/include/hipsparse:${CPATH:-}"
+export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+
+python -m pip install . \
+  --no-build-isolation \
+  --no-cache-dir \
+  -v
+```
+
+---
+
+## Troubleshooting
+
+### `cuda_cmake_macros.h` not found
+
+Symptom:
+
+```text
+fatal error: 'c10/cuda/impl/cuda_cmake_macros.h' file not found
+```
+
+Required host-wrapper flag:
+
+```bash
+export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+```
+
+The automated installer sets this for both builds.
+
+### CUDA and HIP PyTorch header redefinitions
+
+Symptoms include redefinitions from both:
+
+```text
+c10/cuda/...
+c10/hip/...
+ATen/cuda/...
+ATen/hip/...
+```
+
+The v52 baseline removes the unnecessary transitive `framework.h` include from `texture.h`. A stale or manually regenerated tree may need a clean restart from upstream.
+
+### `FineRaster.inl` not found while applying v36
+
+The final stack must execute patches from the nvdiffrast repository directory.
+
+Use the current wrapper:
+
+```bash
+REPO="$REPO" \
+PATCH_DIR="$INSTALLER/patches" \
+bash "$INSTALLER/patches/apply_final_rocm72_gfx1201_v52.sh"
+```
+
+Older copies of the wrapper did not change into `$REPO`.
+
+### PyTorch reports `AMD Radeon Graphics`
+
+A generic device string is not by itself a failure.
+
+Confirm:
+
+```text
+torch.cuda.is_available() == True
+PYTORCH_ROCM_ARCH=gfx1201
+```
+
+The compiler command should contain:
+
+```text
+--offload-arch=gfx1201
+```
+
+### HIP context after a hardware fault
+
+After a hardware trap, illegal address, unspecified launch failure or `HSA_STATUS_ERROR_EXCEPTION`, use a fresh Python process. Preferably start a fresh shell before repeating validation.
+
+Useful diagnostic environment:
 
 ```bash
 export AMD_SERIALIZE_KERNEL=3
@@ -469,41 +715,84 @@ export TORCH_DISABLE_ADDR2LINE=1
 
 ---
 
-## Remaining open questions
+## Known non-fatal build warnings
 
-See [`docs/KNOWN_OPEN_QUESTIONS_v52.md`](docs/KNOWN_OPEN_QUESTIONS_v52.md).
+The validated build may emit warnings such as:
 
-Current short version:
+- `-lineinfo` unused by host Clang,
+- ignored cleanup return values from `hipFree` or `hipHostFree`,
+- unused variables in upstream-derived or generated wrappers,
+- setuptools manifest exclusion warnings,
+- legacy `cp -n` portability warnings in some backup paths.
+
+These warnings did not prevent compilation, linking, installation or validation in the documented fresh-host run.
+
+---
+
+## Repository layout
 
 ```text
-- very large production meshes
-- long PSHuman / continuous-remeshing optimization loops
-- clipping / offscreen geometry stress cases
-- depth-ordering / z-sensitive finite-difference tests
-- texture stress beyond basic forward/backward
-- performance benchmarking versus CUDA and/or native PyTorch paths
-- multi-batch / multi-view real-world workloads
-- very high resolutions beyond the current 160..256 AA validation matrix
+amd_nvdiffrast_setup.py
+    complete automated clone, baseline, patch, rebuild and validation flow
+
+scripts/
+    runtime-baseline bundle generator
+
+patches/
+    canonical final v52 patches and patch-stack wrapper
+
+tests/
+    marker, path, forward, backward and stress validation tools
+
+docs/
+    technical notes, open questions and validation evidence
+
+third_party/
+    upstream licenses and attribution material
 ```
 
-These are not known failures in the current final v52 stack. They are outside
-the current validation envelope.
+---
+
+## Remaining validation scope
+
+See [docs/KNOWN_OPEN_QUESTIONS_v52.md](docs/KNOWN_OPEN_QUESTIONS_v52.md).
+
+Important areas outside the current validation envelope include:
+
+- very large production meshes,
+- long PSHuman or continuous-remeshing optimization loops,
+- clipping and offscreen geometry stress cases,
+- depth-ordering and Z-sensitive finite-difference tests,
+- texture stress beyond the current basic forward/backward coverage,
+- performance benchmarking against CUDA or native PyTorch paths,
+- multi-batch and multi-view production workloads,
+- resolutions substantially above the current 160–256 antialias matrix.
+
+These are not documented failures of final v52. They remain additional validation targets.
+
+---
+
+## Reproducibility notes
+
+For release-quality validation artifacts, record the exact revisions:
+
+```bash
+git -C "$INSTALLER" rev-parse HEAD
+git -C "$REPO" rev-parse HEAD
+```
+
+The published fresh-host log was created from fresh clones, but the original run did not print both exact `HEAD` SHAs into the console output.
 
 ---
 
 ## License and attribution
 
-This repository contains setup scripts, patches, and documentation around
-`NVlabs/nvdiffrast`.
+This repository contains setup scripts, patches and documentation around `NVlabs/nvdiffrast`.
 
-- `NVlabs/nvdiffrast` is copyright NVIDIA Corporation and distributed under the
-  NVIDIA Source Code License. See `third_party/nvdiffrast/LICENSE.txt`.
-- Non-commercial use restrictions may apply; read the upstream NVIDIA Source
-  Code License before redistribution or commercial use.
-- Earlier ROCm patch work by `tashibi/nvdiffrast-rocm-patch` is acknowledged.
-  See `third_party/tashibi-nvdiffrast-rocm-patch/LICENSE`.
-- Original helper scripts and documentation in this repository are MIT-licensed
-  unless marked otherwise.
+- `NVlabs/nvdiffrast` is copyright NVIDIA Corporation and is distributed under the NVIDIA Source Code License. See [`third_party/nvdiffrast/LICENSE.txt`](third_party/nvdiffrast/LICENSE.txt).
+- Non-commercial-use restrictions may apply. Read the upstream NVIDIA license before redistribution or commercial use.
+- Earlier ROCm patch work by `tashibi/nvdiffrast-rocm-patch` is acknowledged. See [`third_party/tashibi-nvdiffrast-rocm-patch/LICENSE`](third_party/tashibi-nvdiffrast-rocm-patch/LICENSE).
+- Original helper scripts and documentation in this repository are MIT-licensed unless marked otherwise.
 
 ---
 
@@ -511,30 +800,39 @@ This repository contains setup scripts, patches, and documentation around
 
 ```text
 Project:
-  Community ROCm 7.2 / RDNA4 gfx1201 patch stack for NVlabs/nvdiffrast.
+  Community ROCm 7.2 / RDNA4 gfx1201 build and patch stack
+  for upstream NVlabs/nvdiffrast.
+
+Validated fresh-host environment:
+  Ubuntu 24.04
+  Python 3.12.3
+  PyTorch 2.13.0+rocm7.2
+  HIP 7.2.53211
+  AMD Radeon AI PRO R9700 / gfx1201
+  110/110 quick-validation checks passed
 
 Do not:
-  Treat this repository as the nvdiffrast source tree.
+  Treat this repository as the upstream nvdiffrast source tree.
   pip-install this repository directly.
-  Apply v48/v49/v50 diagnostic patches as final fixes.
+  Apply only the final patch stack to a raw fresh upstream clone.
+  Reintroduce v48/v49/v50 diagnostic patches as final fixes.
 
 Correct flow:
-  Clone upstream NVlabs/nvdiffrast.
-  Generate ROCm/HIP runtime baseline.
-  Apply final v52 patch stack.
-  Clean rebuild.
+  Clone upstream nvdiffrast.
+  Generate the ROCm/HIP runtime baseline.
+  Perform the initial baseline build.
+  Apply final v52.
+  Perform a clean final rebuild.
   Verify v47/v51 markers after hipify.
-  Run v52 validation tests.
+  Run validation.
 
-Key fixes:
+Key runtime fixes:
   v36: FineRaster RDNA Wave32 row-mask fix.
-  v41m2: Interpolate empty-warp allsync ROCm fix.
-  v47: Antialias forward workBuffer torch-native zero_().
-  v51: Antialias backward/grad workBuffer y-counter torch-native zero_().
+  v41m2: Interpolate empty-warp all_sync ROCm fix.
+  v47: Antialias forward torch-native work-buffer zeroing.
+  v51: Antialias backward/grad torch-native Y-counter zeroing.
 
-Validated:
-  Path probe 14/14.
-  AA forward statistical matrix 480/480.
-  AA backward/grad matrix 72/72.
-  AA backward_pos statistical probe 360/360 (real .backward(), 20 runs).
+Fresh-host evidence:
+  docs/validation/fresh-host-ubuntu24.04-rocm72-gfx1201-v52.md
+  docs/validation/logs/fresh-host-ubuntu24.04-rocm72-gfx1201-v52-full.log
 ```
