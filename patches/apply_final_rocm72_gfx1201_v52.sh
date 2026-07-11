@@ -57,6 +57,11 @@ run_patch() {
   echo "================================================================"
   echo "APPLY: $patch"
   echo "================================================================"
+  # Most patch scripts use paths relative to the nvdiffrast tree
+  # (e.g. Path("csrc/common/hipraster/impl/FineRaster.inl")) and do NOT cd
+  # themselves. amd_nvdiffrast_setup.py invokes this wrapper with cwd set to the
+  # patch repo, so we must switch into $REPO here. The subshell keeps the cwd
+  # change local to this call.
   (
     cd "$REPO"
     REPO="$REPO" bash "$patch"
@@ -169,7 +174,8 @@ cd ~/therock_test/nvdiffrast
 
 pip uninstall -y nvdiffrast
 
-SITE="$HOME/therock_test/venv/lib/python3.10/site-packages"
+# site-packages of the *active* venv (works for any Python version):
+SITE="$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
 rm -rf "$SITE"/nvdiffrast
 rm -rf "$SITE"/nvdiffrast-*.dist-info
 rm -rf "$SITE"/__editable__*nvdiffrast*
@@ -188,6 +194,11 @@ export FORCE_CUDA=1
 export MAX_JOBS=1
 export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
 
+# Required: PyTorch's ROCm wheels ship c10/cuda headers but not the CMake-generated
+# c10/cuda/impl/cuda_cmake_macros.h. Without this the torch_*.cpp wrappers fail with
+# "fatal error: 'c10/cuda/impl/cuda_cmake_macros.h' file not found".
+export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+
 python -m pip install . --no-build-isolation --no-cache-dir -v 2>&1 | tee /tmp/build_final_v52_clean.log
 
 # Marker check after build:
@@ -197,7 +208,7 @@ grep -n "v46\|v48\|v49\|v50\|hipStreamSynchronize\|hipDeviceSynchronize\|cudaStr
   csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp || true
 
 # Validation:
-cd ~/therock_test/continuous-remeshing
+cd ~/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/tests
 AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 python ./nvdiffrast_path_probe_v1.py --timeout 30
 
 python ./aa_matrix_stat_probe.py --runs 20 \
