@@ -369,6 +369,101 @@ for p in evhash_targets:
     s = s.replace(evhash_old, evhash_new)
     p.write_text(s)
     print(f"OK evhash narrowing fix (evHashElements): {p} changed={s != orig}")
+    
+# -------------------------------------------------------------------------
+# 1f) texture.h: remove unused transitive framework.h include.
+#
+# texture.h does not use any symbols from framework.h. Keeping this include
+# causes hipify to generate:
+#
+#     texture_hip.h -> framework_hip.h -> ATen/hip/...
+#
+# while torch_texture_hip.cpp already receives:
+#
+#     torch_common.inl -> framework.h -> ATen/cuda/...
+#
+# This mixes PyTorch CUDA and HIP headers in one translation unit and causes
+# many duplicate declarations and redefinition errors.
+#
+# texture.cpp includes framework.h directly, and torch_texture.cpp receives it
+# through torch_common.inl, so removing the transitive include is safe.
+#
+# Marker: NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK
+# -------------------------------------------------------------------------
+texture_header = Path("csrc/common/texture.h")
+if not texture_header.exists():
+    print(f"FEHLER: required source header missing: {texture_header}")
+    raise SystemExit(1)
+
+texture_header_targets = [
+    texture_header,
+    Path("csrc/common/texture_hip.h"),  # stale hipify output from a previous build
+]
+
+texture_framework_marker = (
+    "// NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK: "
+    "texture.h does not use framework symbols.\n"
+)
+
+texture_framework_includes = [
+    '#include "framework.h"\n',
+    '#include "framework_hip.h"\n',
+]
+
+for p in texture_header_targets:
+    if not p.exists():
+        continue
+
+    s = p.read_text()
+    orig = s
+
+    if "NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK" not in s:
+        for include_line in texture_framework_includes:
+            if include_line in s:
+                s = s.replace(include_line, texture_framework_marker, 1)
+                break
+        else:
+            print(
+                f"FEHLER: framework include not found in {p} "
+                "(upstream layout changed?)"
+            )
+            raise SystemExit(1)
+
+    # Remove any second or stale CUDA/HIP framework include.
+    for include_line in texture_framework_includes:
+        s = s.replace(include_line, "")
+
+    if any(include_line in s for include_line in texture_framework_includes):
+        print(f"FEHLER: transitive framework include still present in {p}")
+        raise SystemExit(1)
+
+    if "NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK" not in s:
+        print(f"FEHLER: texture framework-removal marker missing in {p}")
+        raise SystemExit(1)
+
+    if s != orig:
+        p.write_text(s)
+
+    print(
+        "OK texture transitive framework include removed "
+        f"(NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK): "
+        f"{p} changed={s != orig}"
+    )
+
+# texture.cpp genuinely uses NVDR_CHECK and must retain its direct include.
+texture_cpp = Path("csrc/common/texture.cpp")
+if not texture_cpp.exists():
+    print(f"FEHLER: required source file missing: {texture_cpp}")
+    raise SystemExit(1)
+
+if '#include "framework.h"' not in texture_cpp.read_text():
+    print(
+        "FEHLER: texture.cpp no longer includes framework.h directly; "
+        "refusing to continue"
+    )
+    raise SystemExit(1)
+
+print("OK texture.cpp retains its required direct framework.h include")
 
 # -------------------------------------------------------------------------
 # 2) Util.inl: replace CUDA/PTX-only inline asm with portable HIP/C++ helpers.
