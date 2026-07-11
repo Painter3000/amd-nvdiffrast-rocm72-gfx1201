@@ -252,6 +252,36 @@ for p in aa_targets:
     print(f"OK antialias 64-bit ballot mask (NVDR_ROCM_AA_BALLOT64): {p} changed={s != orig}")
 
 # -------------------------------------------------------------------------
+# 1c) interpolate.cu: same HIP 64-bit mask requirement for __all_sync().
+#     Upstream: if (__all_sync(0xffffffffu, !triValid))
+#     hipcc rejects the 32-bit mask, so the baseline build fails on
+#     interpolate.hip before patch_rocm_interpolate_emptywarp_allsync_fix_v41m2.sh
+#     can run. Widening the literal to 64-bit produces exactly the baseline
+#     form that v41m2 later expects and replaces with the #if HIP block.
+#     Marker: NVDR_ROCM_INTERP_ALLSYNC64
+# -------------------------------------------------------------------------
+interp_targets = [
+    Path("csrc/common/interpolate.cu"),
+    Path("csrc/common/interpolate.hip"),  # stale hipify output from a previous build
+]
+for p in interp_targets:
+    if not p.exists():
+        continue
+    s = p.read_text()
+    orig = s
+    s = s.replace(
+        "    if (__all_sync(0xffffffffu, !triValid))",
+        "    if (__all_sync(0xffffffffffffffffull, !triValid)) // NVDR_ROCM_INTERP_ALLSYNC64",
+    )
+    if "0xffffffffffffffffull, !triValid" not in s:
+        print(f"FEHLER: 64-bit __all_sync baseline missing in {p} "
+              f"(upstream formatting changed? expected 'if (__all_sync(0xffffffffu, !triValid))')")
+        raise SystemExit(1)
+    if s != orig:
+        p.write_text(s)
+    print(f"OK interpolate 64-bit all_sync mask (NVDR_ROCM_INTERP_ALLSYNC64): {p} changed={s != orig}")
+
+# -------------------------------------------------------------------------
 # 2) Util.inl: replace CUDA/PTX-only inline asm with portable HIP/C++ helpers.
 # -------------------------------------------------------------------------
 p = impl / "Util.inl"
