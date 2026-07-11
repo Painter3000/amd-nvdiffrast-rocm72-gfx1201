@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
 """
-v44b_backward_stat_probe.py
+aa_backward_pos_stat_probe_v52.py
 
-Wie aa_matrix_stat_probe.py, aber fuer
-nvdiffrast_antialias_grid_bisect_v44b.py (--stages backward_pos).
+Statistical validation probe for the final v52 antialias backward/grad
+workBuffer y-counter fix (v51 in this repo's patch numbering).
 
-Fuehrt den Bisect-Probe N-mal aus und aggregiert pro Einzelfall
-(cells/res/topo/color/pg/stage) die Erfolgsquote - statt eines einzelnen
-Laufs, der bei diesem Nicht-Determinismus-Verhalten nicht aussagekraeftig
-genug ist.
+Wraps nvdiffrast_antialias_grid_bisect_v44b.py (--stages backward_pos), which
+is the only stage that actually calls loss.backward() and reads back
+pos.grad - unlike --stages call,sync,finite,diff, which exercises the
+antialias_fwd/antialias_grad setup and data paths without ever triggering a
+real backward pass.
 
-Nutzung:
-  python v44b_backward_stat_probe.py --runs 20 \\
+Runs the bisect probe N times and aggregates the success rate PER CASE
+(cells/res/topo/color/pg/stage), instead of relying on a single run, which
+was shown to be insufficient given the run-to-run non-determinism observed
+elsewhere in this validation effort.
+
+Dependency: nvdiffrast_antialias_grid_bisect_v44b.py must be present in the
+same directory (or pointed to via --probe-script).
+
+Usage:
+  python aa_backward_pos_stat_probe_v52.py --runs 20 \\
     --cells-list 1,4,16 --res-list 160,180,182,192,224,256 \\
     --topos explicit --colors interp --pos-grads 1 --stages backward_pos \\
-    --probe-script ./nvdiffrast_antialias_grid_bisect_v44b.py
+    --probe-script ./nvdiffrast_antialias_grid_bisect_v44b.py \\
+    --label "final v52 AA backward_pos statistical probe"
 """
 
 import argparse
@@ -79,7 +89,7 @@ def main():
     ap.add_argument("--pos-grads", default="1")
     ap.add_argument("--stages", default="backward_pos")
     ap.add_argument("--probe-script", default="./nvdiffrast_antialias_grid_bisect_v44b.py")
-    ap.add_argument("--label", default="")
+    ap.add_argument("--label", default="final v52 AA backward_pos statistical probe")
     args = ap.parse_args()
 
     print(f"Aggregiere {args.runs} Wiederholungen"
