@@ -50,6 +50,12 @@ AA backward / gradient matrix:
   res=160,180,182,192,224,256
   stages=call,sync,finite,diff
   passed=72 failed=0 total=72
+
+AA backward_pos statistical probe:
+  aa_backward_pos_stat_probe_v52.py --runs 20
+  cells=1,4,16, res=160,180,182,192,224,256
+  passed=360 failed=0 total=360
+  18/18 cases with 100% success over 20 runs
 ```
 
 Validated paths include:
@@ -67,6 +73,8 @@ Validated paths include:
 - antialias backward position-grid cases
 - antialias forward matrix stress over critical resolutions
 - antialias backward/grad matrix over cells=1,4,16 and res=160..256
+- antialias backward_pos statistical probe (real .backward() calls,
+  20 runs, 360/360 passed) over cells=1,4,16 and res=160..256
 - basic texture forward and backward
 ```
 
@@ -367,6 +375,29 @@ python ./test_antialias_backward_matrix_v52.py \
   --verbose
 ```
 
+Backward position-gradient statistical validation:
+
+```bash
+cd tests
+
+AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 \
+python ./aa_backward_pos_stat_probe_v52.py --runs 20 \
+  --cells-list 1,4,16 \
+  --res-list 160,180,182,192,224,256 \
+  --topos explicit \
+  --colors interp \
+  --pos-grads 1 \
+  --stages backward_pos \
+  --probe-script ./test_antialias_backward_matrix_v52.py \
+  --label "final v52 AA backward_pos statistical probe"
+```
+
+**Note:** The preceding backward/grad block tests only setup/data paths
+(call, sync, finite, diff) without triggering a real `.backward()` call.
+This backward_pos block is the only test that actually calls `loss.backward()`
+and reads back `pos.grad`, repeated over 20 runs to exclude run-to-run
+non-determinism.
+
 ---
 
 ## HIP crash hygiene
@@ -452,4 +483,5 @@ Validated:
   Path probe 14/14.
   AA forward statistical matrix 480/480.
   AA backward/grad matrix 72/72.
+  AA backward_pos statistical probe 360/360 (real .backward(), 20 runs).
 ```
