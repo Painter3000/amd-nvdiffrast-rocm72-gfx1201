@@ -220,6 +220,38 @@ for p in sorted(impl.glob("*.inl")):
     hip_mask_compat(p)
 
 # -------------------------------------------------------------------------
+# 1b) antialias.cu: HIP requires 64-bit masks for __ballot_sync().
+#     Upstream declares the antialias-grad active mask as 32-bit:
+#         unsigned int amask = __ballot_sync(0xffffffffu, item.w);
+#     hipcc rejects this (static_assert: mask must be 64-bit), so the very
+#     first baseline build fails before any v52 stack patch can run.
+#     Widening it here also establishes the exact 64-bit baseline form that
+#     patch_antialias_grad_rocm_wave32_v38.sh expects later in the stack.
+#     Marker: NVDR_ROCM_AA_BALLOT64
+# -------------------------------------------------------------------------
+aa_targets = [
+    Path("csrc/common/antialias.cu"),
+    Path("csrc/common/antialias.hip"),  # stale hipify output from a previous build
+]
+for p in aa_targets:
+    if not p.exists():
+        continue
+    s = p.read_text()
+    orig = s
+    s = s.replace(
+        "        unsigned int amask = __ballot_sync(0xffffffffu, item.w);",
+        "        // NVDR_ROCM_AA_BALLOT64: HIP requires a 64-bit mask for __ballot_sync().\n"
+        "        unsigned long long amask = __ballot_sync(0xffffffffffffffffull, item.w);",
+    )
+    if "unsigned long long amask" not in s:
+        print(f"FEHLER: 64-bit amask baseline missing in {p} "
+              f"(upstream formatting changed? expected 'unsigned int amask = __ballot_sync(0xffffffffu, item.w);')")
+        raise SystemExit(1)
+    if s != orig:
+        p.write_text(s)
+    print(f"OK antialias 64-bit ballot mask (NVDR_ROCM_AA_BALLOT64): {p} changed={s != orig}")
+
+# -------------------------------------------------------------------------
 # 2) Util.inl: replace CUDA/PTX-only inline asm with portable HIP/C++ helpers.
 # -------------------------------------------------------------------------
 p = impl / "Util.inl"
