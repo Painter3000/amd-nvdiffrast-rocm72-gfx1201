@@ -246,6 +246,45 @@ Expected: no output.
 
 ## Installation
 
+### Prerequisites
+
+The setup script does **not** create the Python virtual environment and does
+**not** install PyTorch. Before running the setup, the following must already
+be in place:
+
+```text
+- ROCm 7.2 installed under /opt/rocm (or pass a custom --rocm-path)
+- An AMD RDNA4 / gfx1201 GPU with working amdgpu/KFD driver
+  (the current user should be in the video and render groups)
+- Python 3.10.x
+- git and standard build tools
+```
+
+Create the venv and install ROCm PyTorch first:
+
+```bash
+mkdir -p ~/therock_test
+python3.10 -m venv ~/therock_test/venv
+source ~/therock_test/venv/bin/activate
+
+pip install --upgrade pip
+pip install torch --index-url https://download.pytorch.org/whl/rocm7.2
+```
+
+Verify that ROCm PyTorch works before continuing:
+
+```bash
+python -c "import torch; print(torch.__version__, torch.version.hip, torch.cuda.is_available())"
+```
+
+Expected: a `+rocm7.2` torch version, a HIP version string, and `True`.
+The setup script performs the same check and aborts if `torch.cuda.is_available()`
+returns `False`.
+
+Validated with `torch 2.12.0+rocm7.2`. If your PyTorch/ROCm distribution comes
+from a different source (e.g. TheRock nightly builds), any venv with a working
+ROCm-enabled PyTorch for gfx1201 is fine — pass its path via `--venv`.
+
 ### Recommended setup command
 
 Do **not** install this repository directly with `pip install`.
@@ -330,7 +369,7 @@ python -m pip install . --no-build-isolation --no-cache-dir -v
 Note about CPATH when following the manual flow:
 
 The `nvdiffrast_rocm_cuda_compat` directory referenced in `CPATH` is created by
-the automated generator (`scripts/nvdiffrast_rocm72_bundle_v4_generator.sh`) when
+the automated generator (`scripts/nvdiffrast_rocm72_bundle_v52_generator.sh`) when
 you use the recommended setup flow. If you apply the patches and rebuild
 manually without running the generator, you will likely see missing-header
 errors unless you create or populate that compatibility directory yourself.
