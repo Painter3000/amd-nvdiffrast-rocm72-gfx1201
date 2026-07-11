@@ -329,6 +329,48 @@ for p in tex_targets:
     print(f"OK texture __frcp_rz shim (NVDR_ROCM_FRCP_RZ): {p} changed={s != orig}")
 
 # -------------------------------------------------------------------------
+# 1e) torch_antialias.cpp: clang++ rejects the narrowing conversion in
+#         torch::zeros({(uint64_t)... * ... * 4}, opts)
+#     because torch::zeros takes IntArrayRef (int64_t) and C++20 forbids the
+#     implicit uint64_t -> int64_t narrowing inside a braced-init-list. GCC
+#     accepted it, ROCm clang++ does not:
+#         error: non-constant-expression cannot be narrowed from 'uint64_t' to 'long'
+#     This is the same fix as patches/patch_clang_antialias_evhash_narrowing_v41c.sh,
+#     but it must run BEFORE the baseline build -- the patch stack only runs
+#     afterwards, so the build would never get that far.
+#     Note we patch the .cpp source, not torch_antialias_hip.cpp: the latter is
+#     produced from it by hipify during the build and inherits the fix.
+#     v41c is idempotent (it checks for evHashElements), so it later reports
+#     "already patched" instead of conflicting.
+#     Marker: evHashElements (kept identical to v41c on purpose)
+# -------------------------------------------------------------------------
+evhash_old = "    torch::Tensor ev_hash = torch::zeros({(uint64_t)p.allocTriangles * AA_HASH_ELEMENTS_PER_TRIANGLE(p.allocTriangles) * 4}, opts);"
+evhash_new = """    int64_t evHashElements = static_cast<int64_t>(
+        static_cast<uint64_t>(p.allocTriangles) *
+        static_cast<uint64_t>(AA_HASH_ELEMENTS_PER_TRIANGLE(p.allocTriangles)) *
+        4ull);
+    torch::Tensor ev_hash = torch::zeros({evHashElements}, opts);"""
+
+evhash_targets = [
+    Path("csrc/torch/torch_antialias.cpp"),
+    Path("csrc/torch/torch_antialias_hip.cpp"),  # stale hipify output from a previous build
+]
+for p in evhash_targets:
+    if not p.exists():
+        continue
+    s = p.read_text()
+    orig = s
+    if "evHashElements" in s:
+        print(f"OK evhash narrowing fix: {p} already patched")
+        continue
+    if evhash_old not in s:
+        print(f"FEHLER: evhash target line not found in {p} (upstream formatting changed?)")
+        raise SystemExit(1)
+    s = s.replace(evhash_old, evhash_new)
+    p.write_text(s)
+    print(f"OK evhash narrowing fix (evHashElements): {p} changed={s != orig}")
+
+# -------------------------------------------------------------------------
 # 2) Util.inl: replace CUDA/PTX-only inline asm with portable HIP/C++ helpers.
 # -------------------------------------------------------------------------
 p = impl / "Util.inl"
@@ -842,7 +884,16 @@ fi
 # CPPFLAGS is appended to the compiler flags by distutils' customize_compiler(),
 # which is what builds the torch_*.cpp wrappers.
 echo "=== Enable PyTorch ROCm header workaround (NVDR_ROCM_C10_NO_CMAKE_CONFIGURE) ==="
-export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+# Idempotent: amd_nvdiffrast_setup.py already exports CPPFLAGS and passes it into
+# this script, so appending unconditionally would define the macro twice.
+case " ${CPPFLAGS:-} " in
+  *" -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE "*)
+    echo "CPPFLAGS already carries the guard; leaving it unchanged."
+    ;;
+  *)
+    export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+    ;;
+esac
 echo "CPPFLAGS=$CPPFLAGS"
 
 # Belt-and-braces fallback: should the define fail to reach a translation unit
