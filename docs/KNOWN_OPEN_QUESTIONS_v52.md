@@ -236,8 +236,31 @@ Result:
 passed=72 failed=0 total=72
 ```
 
+This targeted matrix exercises `antialias_fwd`/`antialias_grad` setup and data
+paths (call, sync, finite, diff) but does not itself trigger an actual
+`loss.backward()` call. A separate statistical probe closes that gap by
+running the `backward_pos` stage, which does call `.backward()` and reads
+back `pos.grad`, repeated over multiple runs to rule out the run-to-run
+non-determinism observed elsewhere in this validation effort:
+
+```text
+final v52 AA backward_pos statistical probe
+cells: 1,4,16
+resolutions: 160,180,182,192,224,256
+topology: explicit
+colors: interp
+pos-grads: 1
+stage: backward_pos
+runs: 20
+
+Result:
+passed=360 failed=0 total=360
+18/18 cases with 100% success over 20 runs
+```
+
 This makes antialias forward and backward/grad validated for the current v52
-test matrix.
+test matrix, including a real, repeated `.backward()` exercise of the v51
+workBuffer y-counter fix.
 
 ---
 
@@ -283,6 +306,8 @@ The current final v52 validation covers:
 - antialias backward position-grid cases
 - antialias forward matrix stress over critical resolutions
 - antialias backward/grad matrix over cells=1,4,16 and res=160..256
+- antialias backward_pos statistical probe (real `.backward()`, 20 runs,
+  360/360 passed) over the same cells/resolution range
 - basic texture forward and backward
 ```
 
