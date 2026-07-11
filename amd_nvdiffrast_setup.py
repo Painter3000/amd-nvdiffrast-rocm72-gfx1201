@@ -290,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
 
     check_torch(venv, args.arch)
 
-    generator = HERE / "scripts" / "nvdiffrast_rocm72_bundle_v4_generator.sh"
+    generator = HERE / "scripts" / "nvdiffrast_rocm72_bundle_v52_generator.sh"
     final_stack = HERE / "patches" / "apply_final_rocm72_gfx1201_v52.sh"
 
     if not generator.exists():
@@ -300,14 +300,14 @@ def main(argv: list[str] | None = None) -> int:
 
     env = make_env(args, root, repo, venv, bundle_dir)
 
-    print("\n=== Generate v4 ROCm runtime baseline bundle ===")
+    print("\n=== Generate v52 ROCm runtime baseline bundle ===")
     run(["bash", str(generator)], env=env)
 
     reinstall = bundle_dir / "reinstall_nvdiffrast_rocm72_gfx1201.sh"
     if not reinstall.exists():
         die(f"reinstall script was not generated: {reinstall}")
 
-    print("\n=== Apply v4 runtime baseline and initial build ===")
+    print("\n=== Apply v52 runtime baseline and initial build ===")
     env_runtime = env.copy()
     env_runtime["MODE"] = "runtime"
     run(["bash", str(reinstall)], env=env_runtime)
