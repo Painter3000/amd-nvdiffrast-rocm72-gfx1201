@@ -282,6 +282,53 @@ for p in interp_targets:
     print(f"OK interpolate 64-bit all_sync mask (NVDR_ROCM_INTERP_ALLSYNC64): {p} changed={s != orig}")
 
 # -------------------------------------------------------------------------
+# 1d) texture_kernel.cu: HIP has no directed-rounding reciprocal (__frcp_rz).
+#     ROCm's __clang_hip_math.h only provides __frcp_rn (round-to-nearest), so
+#     the baseline build fails with "use of undeclared identifier '__frcp_rz'".
+#     Mapping to __frcp_rn is NOT bit-exact (differs by 1 ULP in ~50% of cases),
+#     so we emulate round-toward-zero exactly: IEEE divide, then step one ULP
+#     toward zero if the magnitude overshot. This preserves the upstream
+#     invariant |x * m| <= 0.5 used by the cubemap face mapping.
+#     Implemented as a macro so the call sites stay untouched and the CUDA
+#     path keeps using the native intrinsic.
+#     Marker: NVDR_ROCM_FRCP_RZ
+# -------------------------------------------------------------------------
+frcp_shim = '''
+// NVDR_ROCM_FRCP_RZ: HIP/ROCm provides no round-toward-zero reciprocal.
+#if defined(__HIP_PLATFORM_AMD__) || defined(__HIPCC__)
+static __device__ __forceinline__ float nvdr_frcp_rz(float x)
+{
+    float r = 1.0f / x;                 // IEEE divide, round-to-nearest.
+    if (fmaf(-x, r, 1.0f) < 0.0f)       // Magnitude overshot the exact quotient?
+        r = nextafterf(r, 0.0f);        // Step one ULP toward zero.
+    return r;
+}
+#define __frcp_rz(x) nvdr_frcp_rz(x)
+#endif
+'''
+
+tex_targets = [
+    Path("csrc/common/texture_kernel.cu"),
+    Path("csrc/common/texture_kernel.hip"),  # stale hipify output from a previous build
+]
+for p in tex_targets:
+    if not p.exists():
+        continue
+    s = p.read_text()
+    orig = s
+    if "NVDR_ROCM_FRCP_RZ" not in s:
+        anchor = '#include "texture.h"\n'
+        if anchor not in s:
+            print(f"FEHLER: include anchor not found in {p} (upstream layout changed?)")
+            raise SystemExit(1)
+        s = s.replace(anchor, anchor + frcp_shim, 1)
+        p.write_text(s)
+    if "__frcp_rz" in s and "NVDR_ROCM_FRCP_RZ" not in s:
+        print(f"FEHLER: __frcp_rz still unshimmed in {p}")
+        raise SystemExit(1)
+    print(f"OK texture __frcp_rz shim (NVDR_ROCM_FRCP_RZ): {p} changed={s != orig}")
+
+# -------------------------------------------------------------------------
 # 2) Util.inl: replace CUDA/PTX-only inline asm with portable HIP/C++ helpers.
 # -------------------------------------------------------------------------
 p = impl / "Util.inl"
