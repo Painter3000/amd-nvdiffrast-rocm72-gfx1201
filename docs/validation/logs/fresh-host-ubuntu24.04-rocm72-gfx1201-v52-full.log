@@ -1,0 +1,2198 @@
+(venv) oem@oem-System-Product-Name:~/therock_test$ git clone https://github.com/Painter3000/amd-nvdiffrast-rocm72-gfx1201.git
+cd amd-nvdiffrast-rocm72-gfx1201
+
+python ./amd_nvdiffrast_setup.py \
+  --workdir ~/therock_test \
+  --venv ~/therock_test/venv \
+  --rocm-path /opt/rocm \
+  --arch gfx1201 \
+  --validation quick
+Klone nach 'amd-nvdiffrast-rocm72-gfx1201' …
+remote: Enumerating objects: 177, done.
+remote: Counting objects: 100% (177/177), done.
+remote: Compressing objects: 100% (174/174), done.
+remote: Total 177 (delta 81), reused 0 (delta 0), pack-reused 0 (from 0)
+Empfange Objekte: 100% (177/177), 127.26 KiB | 3.18 MiB/s, fertig.
+Löse Unterschiede auf: 100% (81/81), fertig.
+=== AMD nvdiffrast ROCm72/gfx1201 final v52 setup ===
+workdir:    /home/oem/therock_test
+repo:       /home/oem/therock_test/nvdiffrast
+venv:       /home/oem/therock_test/venv
+bundle:     /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+rocm path:  /opt/rocm
+arch:       gfx1201
+validation: quick
+
+$ git clone https://github.com/NVlabs/nvdiffrast.git /home/oem/therock_test/nvdiffrast
+Klone nach '/home/oem/therock_test/nvdiffrast' …
+remote: Enumerating objects: 523, done.
+remote: Counting objects: 100% (265/265), done.
+remote: Compressing objects: 100% (75/75), done.
+remote: Total 523 (delta 198), reused 190 (delta 190), pack-reused 258 (from 1)
+Empfange Objekte: 100% (523/523), 11.12 MiB | 10.50 MiB/s, fertig.
+Löse Unterschiede auf: 100% (284/284), fertig.
+
+$ /home/oem/therock_test/venv/bin/python -c 
+import sys, torch
+print("Python:", sys.executable)
+print("Torch:", torch.__version__)
+print("HIP:", getattr(torch.version, "hip", None))
+print("cuda available:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    print("device:", torch.cuda.get_device_name(0))
+else:
+    raise SystemExit("torch.cuda is not available; ROCm PyTorch is not working")
+
+Python: /home/oem/therock_test/venv/bin/python
+Torch: 2.13.0+rocm7.2
+HIP: 7.2.53211
+cuda available: True
+device: AMD Radeon Graphics
+Target arch requested: gfx1201
+
+=== Generate v52 ROCm runtime baseline bundle ===
+
+$ bash /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/scripts/nvdiffrast_rocm72_bundle_v52_generator.sh
+OK: runtime-baseline bundle for final v52 created at /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+
+Run:
+  cd /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+  MODE=coverage_probe ./reinstall_nvdiffrast_rocm72_gfx1201.sh
+  ./test_min_triangle.sh
+
+=== Apply v52 runtime baseline and initial build ===
+
+$ bash /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/reinstall_nvdiffrast_rocm72_gfx1201.sh
+=== nvdiffrast ROCm72 gfx1201 reinstall ===
+REPO=/home/oem/therock_test/nvdiffrast
+VENV=/home/oem/therock_test/venv
+MODE=runtime
+ROCM_PATH=/opt/rocm
+
+Python: /home/oem/therock_test/venv/bin/python
+Torch: 2.13.0+rocm7.2
+HIP: 7.2.53211
+cuda available: True
+device: AMD Radeon Graphics
+
+=== Ensure hipraster tree exists ===
+INFO: csrc/common/hipraster/impl fehlt. Erzeuge HIP-Struktur aus csrc/common/cudaraster ...
+INFO: hipify-perl gefunden: /opt/rocm/bin/hipify-perl
+
+=== Backup current hipraster/impl/*.inl ===
+'csrc/common/hipraster/impl/BinRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/BinRaster.inl'
+'csrc/common/hipraster/impl/CoarseRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/CoarseRaster.inl'
+'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/FineRaster.inl'
+'csrc/common/hipraster/impl/TriangleSetup.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/TriangleSetup.inl'
+'csrc/common/hipraster/impl/Util.inl' -> 'csrc/common/hipraster/impl/_bundle_backups_20260711_183818/Util.inl'
+
+=== Reset hipraster impl from cudaraster impl ===
+'csrc/common/cudaraster/impl/BinRaster.inl' -> 'csrc/common/hipraster/impl/BinRaster.inl'
+'csrc/common/cudaraster/impl/CoarseRaster.inl' -> 'csrc/common/hipraster/impl/CoarseRaster.inl'
+'csrc/common/cudaraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/FineRaster.inl'
+'csrc/common/cudaraster/impl/TriangleSetup.inl' -> 'csrc/common/hipraster/impl/TriangleSetup.inl'
+'csrc/common/cudaraster/impl/Util.inl' -> 'csrc/common/hipraster/impl/Util.inl'
+
+=== Apply ROCm72/gfx1201 source patches ===
+OK mask compat: BinRaster.inl changed=True
+OK mask compat: CoarseRaster.inl changed=True
+OK mask compat: FineRaster.inl changed=True
+OK mask compat: TriangleSetup.inl changed=False
+OK mask compat: Util.inl changed=True
+OK antialias 64-bit ballot mask (NVDR_ROCM_AA_BALLOT64): csrc/common/antialias.cu changed=True
+OK interpolate 64-bit all_sync mask (NVDR_ROCM_INTERP_ALLSYNC64): csrc/common/interpolate.cu changed=True
+OK texture __frcp_rz shim (NVDR_ROCM_FRCP_RZ): csrc/common/texture_kernel.cu changed=True
+OK evhash narrowing fix (evHashElements): csrc/torch/torch_antialias.cpp changed=True
+OK texture transitive framework include removed (NVDR_ROCM_TEXTURE_NO_TRANSITIVE_FRAMEWORK): csrc/common/texture.h changed=True
+OK texture.cpp retains its required direct framework.h include
+OK Util lane helper patched: 1
+OK Util lane helper patched: 1
+OK Util lane helper patched: 1
+OK Util lane helper patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util asm fallback patched: 1
+OK Util video-asm fallback patched: 1
+OK Util video-asm fallback patched: 1
+OK Util video-asm fallback patched: 1
+OK Util video-asm fallback patched: 1
+OK Util asm helper patched: findLeadingOne x1
+OK Util asm helper patched: add_s16lo_s16lo x1
+OK Util asm helper patched: add_s16hi_s16lo x1
+OK Util asm helper patched: add_s16lo_s16hi x1
+OK Util asm helper patched: add_s16hi_s16hi x1
+OK Util asm helper patched: sub_s16lo_s16lo x1
+OK Util asm helper patched: sub_s16hi_s16lo x1
+OK Util asm helper patched: sub_s16lo_s16hi x1
+OK Util asm helper patched: sub_s16hi_s16hi x1
+OK Util asm helper patched: sub_u16lo_u16lo x1
+OK Util asm helper patched: sub_u16hi_u16lo x1
+OK Util asm helper patched: sub_u16lo_u16hi x1
+OK Util asm helper patched: sub_u16hi_u16hi x1
+OK Util asm helper patched: add_b0 x1
+OK Util asm helper patched: add_b1 x1
+OK Util asm helper patched: add_b2 x1
+OK Util asm helper patched: add_b3 x1
+OK Util asm helper patched: vmad_b0 x1
+OK Util asm helper patched: vmad_b1 x1
+OK Util asm helper patched: vmad_b2 x1
+OK Util asm helper patched: vmad_b3 x1
+OK Util asm helper patched: vmad_b0_b3 x1
+OK Util asm helper patched: vmad_b1_b3 x1
+OK Util asm helper patched: vmad_b2_b3 x1
+OK Util asm helper patched: vmad_b3_b3 x1
+OK Util asm helper patched: add_mask8 x1
+OK Util asm helper patched: sub_mask8 x1
+OK Util asm helper patched: max_add x1
+OK Util asm helper patched: min_add x1
+OK Util asm helper patched: sub_add x1
+OK Util asm helper patched: add_clamp_0_x x1
+OK Util asm helper patched: add_clamp_b0 x1
+OK Util asm helper patched: add_clamp_b2 x1
+OK Util asm helper patched: prmt x1
+OK Util asm helper patched: u32lo_sext x1
+OK Util asm helper patched: isetge x1
+OK Util asm helper patched: slct U32 x1
+OK Util asm helper patched: slct S32 x1
+OK Util.inl ROCm asm cleanup changed=True
+OK CoarseRaster warning fixes changed=True
+OK TriangleSetup res reconstruction inserted after 2 call-site(s)
+OK FineRaster mode=runtime; triHeader zero-init replacements=1
+=== NVDR markers ===
+csrc/common/hipraster/impl/FineRaster.inl:278:                    uint4 triHeader = make_uint4(0, 0, 0, 0); // NVDR_ROCM_TRIHEADER_ZEROINIT_BUNDLE
+csrc/common/hipraster/impl/TriangleSetup.inl:310:    // NVDR_ROCM_RECONSTRUCT_RES_BUNDLE
+csrc/common/hipraster/impl/TriangleSetup.inl:354:    // NVDR_ROCM_RECONSTRUCT_RES_BUNDLE
+OK source patch phase complete.
+
+=== Ensure CUDA compat header dir ===
+=== Enable PyTorch ROCm header workaround (NVDR_ROCM_C10_NO_CMAKE_CONFIGURE) ===
+CPPFLAGS already carries the guard; leaving it unchanged.
+CPPFLAGS=-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE
+COMPAT=/home/oem/therock_test/nvdiffrast_rocm_cuda_compat
+
+=== Clean and build/install ===
+Found existing installation: nvdiffrast 0.4.0
+Uninstalling nvdiffrast-0.4.0:
+  Successfully uninstalled nvdiffrast-0.4.0
+Using pip 26.1.2 from /home/oem/therock_test/venv/lib/python3.12/site-packages/pip (python 3.12)
+Processing ./.
+  Running command Preparing metadata (pyproject.toml)
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.h -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.h -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/framework.h -> /home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Defs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/CudaRaster.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Constants.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/PrivateDefs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/CudaRaster.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.h -> /home/oem/therock_test/nvdiffrast/csrc/common/texture.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp [ok]
+  Successfully preprocessed all matching files.
+  Total number of unsupported CUDA function calls: 0
+
+
+  Total number of replaced kernel launches: 0
+  running dist_info
+  creating /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info
+  writing /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/requires.txt
+  writing top-level names to /tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/top_level.txt
+  writing manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest template 'MANIFEST.in'
+  warning: no previously-included files matching '*~' found anywhere in distribution
+  warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+  warning: no previously-included files matching '*.so' found anywhere in distribution
+  warning: no previously-included files matching '__pycache__' found anywhere in distribution
+  warning: no previously-included files matching '.git*' found anywhere in distribution
+  warning: no previously-included files matching '.DS_Store' found anywhere in distribution
+  warning: no previously-included files matching '*.egg-info' found anywhere in distribution
+  warning: no previously-included files matching 'build' found anywhere in distribution
+  warning: no previously-included files matching 'dist' found anywhere in distribution
+  adding license file 'LICENSE.txt'
+  writing manifest file '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast.egg-info/SOURCES.txt'
+  creating '/tmp/pip-modern-metadata-zugurdvi/nvdiffrast-0.4.0.dist-info'
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: numpy in /home/oem/therock_test/venv/lib/python3.12/site-packages (from nvdiffrast==0.4.0) (2.5.1)
+Building wheels for collected packages: nvdiffrast
+  Running command Building wheel for nvdiffrast (pyproject.toml)
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.h -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.h -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/framework.h -> /home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Defs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/CudaRaster.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Constants.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/PrivateDefs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/CudaRaster.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.h -> /home/oem/therock_test/nvdiffrast/csrc/common/texture.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp [skipped, already hipified]
+  Successfully preprocessed all matching files.
+  Total number of unsupported CUDA function calls: 0
+
+
+  Total number of replaced kernel launches: 0
+  running bdist_wheel
+  running build
+  running build_py
+  creating build/lib.linux-x86_64-cpython-312/nvdiffrast
+  copying nvdiffrast/__init__.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast
+  creating build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  copying nvdiffrast/torch/ops.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  copying nvdiffrast/torch/__init__.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  running egg_info
+  creating nvdiffrast.egg-info
+  writing nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to nvdiffrast.egg-info/requires.txt
+  writing top-level names to nvdiffrast.egg-info/top_level.txt
+  writing manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest template 'MANIFEST.in'
+  warning: no previously-included files matching '*~' found anywhere in distribution
+  warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+  warning: no previously-included files matching '*.so' found anywhere in distribution
+  warning: no previously-included files matching '__pycache__' found anywhere in distribution
+  warning: no previously-included files matching '.git*' found anywhere in distribution
+  warning: no previously-included files matching '.DS_Store' found anywhere in distribution
+  warning: no previously-included files matching '*.egg-info' found anywhere in distribution
+  warning: no previously-included files matching 'build' found anywhere in distribution
+  warning: no previously-included files matching 'dist' found anywhere in distribution
+  adding license file 'LICENSE.txt'
+  writing manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  running build_ext
+  building '_nvdiffrast_c' extension
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch
+  [1/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [2/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [3/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:29:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+     29 |         hipFree(m_gpuPtr); // Don't throw an exception.
+        |         ^~~~~~~~~~~~~~~~~
+  /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:69:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+     69 |         hipHostFree(m_hostPtr); // Don't throw an exception.
+        |         ^~~~~~~~~~~~~~~~~~~~~~
+  2 warnings generated.
+  [4/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [5/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [6/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl_kernel.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [7/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/interpolate.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [8/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/rasterize.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [9/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp:34:9: warning: unused variable 'mipTotal' [-Wunused-variable]
+     34 |     int mipTotal = 0;
+        |         ^~~~~~~~
+  1 warning generated.
+  [10/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_kernel.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [11/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [12/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [13/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp:211:26: warning: unused variable 'opts' [-Wunused-variable]
+    211 |     torch::TensorOptions opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA);
+        |                          ^~~~
+  1 warning generated.
+  [14/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [15/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /opt/rocm/llvm/bin/clang++ -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -shared -Wl,-O1 -Wl,-Bsymbolic-functions -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl_kernel.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/interpolate.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/rasterize.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_kernel.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o -L/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/lib -L/opt/rocm/lib -L/opt/rocm/hip/lib -L/usr/lib/x86_64-linux-gnu -lc10 -ltorch -ltorch_cpu -ltorch_python -lamdhip64 -lc10_hip -ltorch_hip -o build/lib.linux-x86_64-cpython-312/_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so
+  installing to build/bdist.linux-x86_64/wheel
+  running install
+  running install_lib
+  creating build/bdist.linux-x86_64/wheel
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/torch/ops.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/torch/__init__.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/__init__.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast
+  copying build/lib.linux-x86_64-cpython-312/_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so -> build/bdist.linux-x86_64/wheel/.
+  running install_egg_info
+  Copying nvdiffrast.egg-info to build/bdist.linux-x86_64/wheel/./nvdiffrast-0.4.0-py3.12.egg-info
+  running install_scripts
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast-0.4.0.dist-info/WHEEL
+  creating '/tmp/pip-ephem-wheel-cache-38dl3lt0/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmppu7hex4i/.tmp-rg69e17e/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+  adding '_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so'
+  adding 'nvdiffrast/__init__.py'
+  adding 'nvdiffrast/torch/__init__.py'
+  adding 'nvdiffrast/torch/ops.py'
+  adding 'nvdiffrast-0.4.0.dist-info/licenses/LICENSE.txt'
+  adding 'nvdiffrast-0.4.0.dist-info/METADATA'
+  adding 'nvdiffrast-0.4.0.dist-info/WHEEL'
+  adding 'nvdiffrast-0.4.0.dist-info/top_level.txt'
+  adding 'nvdiffrast-0.4.0.dist-info/RECORD'
+  removing build/bdist.linux-x86_64/wheel
+  Building wheel for nvdiffrast (pyproject.toml) ... done
+  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3503029 sha256=e9e108515d9f55885cb440ae96dabdff9222371ef9eb521d8a6e106899af374b
+  Stored in directory: /tmp/pip-ephem-wheel-cache-38dl3lt0/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
+Successfully built nvdiffrast
+Installing collected packages: nvdiffrast
+Successfully installed nvdiffrast-0.4.0
+
+=== Import smoke test ===
+torch: 2.13.0+rocm7.2
+hip: 7.2.53211
+cuda available: True
+nvdiffrast import: OK
+
+OK: reinstall completed. Now run ./test_min_triangle.sh from the bundle.
+
+=== Apply final v52 patch stack ===
+
+$ bash /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/apply_final_rocm72_gfx1201_v52.sh
+  cwd: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201
+REPO      = /home/oem/therock_test/nvdiffrast
+PATCH_DIR = /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches
+v36 patch = /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_v36_wave32.sh
+
+Checking patch files...
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_v36_wave32.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_grad_rocm_wave32_v38.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_grad_rocm_wave32_v38b_gradpos_guard.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_persistent_loop_v39b.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_active_hip_antialias_fwd_bounds_v40f_patch_cu_and_hip.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_clang_antialias_evhash_narrowing_v41c.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_interpolate_emptywarp_allsync_fix_v41m2.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_remove_numcta_override_v45.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_v47_native_workbuffer_zero.sh
+OK: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_v51_antialias_grad_workbuffer_y_zero.sh
+
+Checking that diagnostic patches are NOT in the final patch list...
+
+Applying final stack...
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_v36_wave32.sh
+================================================================
+'csrc/common/hipraster/impl/FineRaster.inl' -> 'csrc/common/hipraster/impl/FineRaster.inl.before_wave64_runtime_fix_v36_rdna_wave32.20260711_184020'
+OK: inserted nvdr_ballot32_from_rowmask helper
+OK: updateTileZMax mask-aware
+OK: scan32_value mask-aware
+OK: executeROP U64 exact-mask
+OK: inserted nvdr_rowMask/nvdr_rowShift in fineRasterImpl
+OK: v36 Wave64 runtime fix applied.
+
+=== v36 patch markers / critical lines ===
+156:__device__ __inline__ U32 nvdr_ballot32_from_rowmask(U64 rowMask, U32 rowShift, bool pred)
+167:__device__ __inline__ void executeROP(U32 color, U32 depth, volatile U32* pColor, volatile U32* pDepth, U64 ropMask)
+169:    // ropMask must be the exact set of lanes that enter executeROP().
+237:    const U32 nvdr_rowShift = 0u;
+238:    const U64 nvdr_rowMask  = 0x00000000ffffffffull;
+246:        __syncwarp(nvdr_rowMask);
+301:                updateTileZMax(tileZMax, tileZUpd, tileDepth, temp, nvdr_rowMask);
+320:                    U32 frag = scan32_value(pop, temp, nvdr_rowMask);
+325:                    U32 goodMask = nvdr_ballot32_from_rowmask(nvdr_rowMask, nvdr_rowShift, pop != 0);
+337:            __syncwarp(nvdr_rowMask);
+345:            __syncwarp(nvdr_rowMask);
+354:            __syncwarp(nvdr_rowMask);
+357:            U32 boundaryMask = nvdr_ballot32_from_rowmask(nvdr_rowMask, nvdr_rowShift, temp[ropLaneIdx + 16] != 0);
+361:            U64 fragmentMask64 = __ballot_sync(nvdr_rowMask, hasFragment);
+362:            U32 fragmentMask = (U32)(fragmentMask64 >> nvdr_rowShift);
+390:                U64 ropMask = __ballot_sync((U64)fragmentMask, !zkill);
+392:					executeROP(td.w, depth, &tileColor[pixelInTile], &tileDepth[pixelInTile], ropMask);
+
+=== remaining dangerous tokens check ===
+OK: no bare CUDA warp32 sync/ballot tokens remain in FineRaster.inl
+
+OK: v36 runtime fix patch ready. Rebuild nvdiffrast now.
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_grad_rocm_wave32_v38.sh
+================================================================
+cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
+patched /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu
+0xffffffffffffffffull: 1
+__ballot_sync(amask: 3
+CA_SET_GROUP_MASK(tri ^ (di << 30), amask): 1
+atomicAdd(p.gradPos + 4 * vi1 + 0, gp1x): 1
+
+Rebuild:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+rm -rf build/ dist/ ./*.egg-info
+pip uninstall -y nvdiffrast
+
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+python -m pip install . --no-build-isolation -v
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_grad_rocm_wave32_v38b_gradpos_guard.sh
+================================================================
+cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
+patched /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu
+gradPos guard count: 1
+
+Rebuild:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+rm -rf build/ dist/ ./*.egg-info
+pip uninstall -y nvdiffrast
+
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+python -m pip install . --no-build-isolation -v
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_antialias_persistent_loop_v39b.sh
+================================================================
+cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
+patched /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu
+persistent-loop guard count: 2
+
+Quick source check:
+233:        // ROCm/RDNA persistent-loop guard:
+418:        // ROCm/RDNA persistent-loop guard:
+
+Rebuild:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+rm -rf build/ dist/ ./*.egg-info
+pip uninstall -y nvdiffrast
+
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+python -m pip install . --no-build-isolation -v
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_active_hip_antialias_fwd_bounds_v40f_patch_cu_and_hip.sh
+================================================================
+patching /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu
+cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
+  patched workCount guard
+  patched pixel guards
+  wrote changes
+  verify markers:
+    v40f ROCm/RDNA workCount bounds guard: 1
+    v40f ROCm/RDNA WorkItem bounds guard: 1
+    v40f ROCm/RDNA pixel0/pixel1 bounds guard: 1
+    v40e ROCm/RDNA workCount bounds guard: 0
+    v40e ROCm/RDNA WorkItem bounds guard: 0
+    v40e ROCm/RDNA pixel0/pixel1 bounds guard: 0
+patching /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip
+cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
+  patched workCount guard
+  patched pixel guards
+  wrote changes
+  verify markers:
+    v40f ROCm/RDNA workCount bounds guard: 1
+    v40f ROCm/RDNA WorkItem bounds guard: 1
+    v40f ROCm/RDNA pixel0/pixel1 bounds guard: 1
+    v40e ROCm/RDNA workCount bounds guard: 0
+    v40e ROCm/RDNA WorkItem bounds guard: 0
+    v40e ROCm/RDNA pixel0/pixel1 bounds guard: 0
+
+Search for build-time regeneration/copy sources:
+/home/oem/therock_test/nvdiffrast/setup.py:30:                "csrc/common/antialias.cu",
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:13:#include "../common/antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:11:#include "antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip.before_rocm_antialias_fwd_bounds_v40f:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip.before_rocm_antialias_fwd_bounds_v40f:11:#include "antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/.ninja_log:12:47395	60402	1783787950198758245	/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o	65e464e0f453cea0
+/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/build.ninja:27:build /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o: cuda_compile /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip
+/home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/build.ninja:37:build /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o: compile /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:13:#include "../common/antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:11:#include "antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip.before_rocm_antialias_fwd_bounds_v40f:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip.before_rocm_antialias_fwd_bounds_v40f:11:#include "antialias_hip.h"
+/home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip:1:// !!! This is a file automatically generated by hipify!!!
+/home/oem/therock_test/nvdiffrast/nvdiffrast.egg-info/SOURCES.txt:6:csrc/common/antialias.cu
+/home/oem/therock_test/nvdiffrast/nvdiffrast.egg-info/SOURCES.txt:8:csrc/common/antialias.hip
+/home/oem/therock_test/nvdiffrast/nvdiffrast.egg-info/SOURCES.txt:9:csrc/common/antialias_hip.h
+/home/oem/therock_test/nvdiffrast/nvdiffrast.egg-info/SOURCES.txt:64:csrc/torch/torch_antialias_hip.cpp
+/home/oem/therock_test/nvdiffrast/setup.py:30:                "csrc/common/antialias.cu",
+
+Before rebuild, verify both files:
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu:224:    // v40f ROCm/RDNA workCount bounds guard:
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu:262:        // v40f ROCm/RDNA WorkItem bounds guard.
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu:279:        // v40f ROCm/RDNA pixel0/pixel1 bounds guard.
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:226:    // v40f ROCm/RDNA workCount bounds guard:
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:251:        // v40f ROCm/RDNA WorkItem bounds guard.
+/home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip:268:        // v40f ROCm/RDNA pixel0/pixel1 bounds guard.
+
+Rebuild:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+rm -rf build/ dist/ ./*.egg-info
+pip uninstall -y nvdiffrast
+
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+python -m pip install . --no-build-isolation -v
+
+echo "After rebuild, verify both files:"
+grep -n "v40f ROCm/RDNA\|v40e ROCm/RDNA" csrc/common/antialias.cu csrc/common/antialias.hip || true
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_clang_antialias_evhash_narrowing_v41c.sh
+================================================================
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp: already patched
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp: already patched
+No new changes made.
+
+Verify:
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:49:    int64_t evHashElements = static_cast<int64_t>(
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:51:        static_cast<uint64_t>(AA_HASH_ELEMENTS_PER_TRIANGLE(p.allocTriangles)) *
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:53:    torch::Tensor ev_hash = torch::zeros({evHashElements}, opts);
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:50:    int64_t evHashElements = static_cast<int64_t>(
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:52:        static_cast<uint64_t>(AA_HASH_ELEMENTS_PER_TRIANGLE(p.allocTriangles)) *
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:54:    torch::Tensor ev_hash = torch::zeros({evHashElements}, opts);
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_rocm_interpolate_emptywarp_allsync_fix_v41m2.sh
+================================================================
+patched /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu
+patched /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip
+
+Verify v41m2 block:
+===== /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu =====
+    34	    int triIdx = float_to_triidx(r.w) - 1;
+    35	    bool triValid = (triIdx >= 0 && triIdx < p.numTriangles);
+    36	
+    37	    // If no geometry in entire warp, zero the output and exit.
+    38	    // Otherwise force barys to zero and output with live threads.
+    39	#if defined(__HIP_PLATFORM_AMD__) || defined(__HIPCC__)
+    40	    // v41m2 ROCm/RDNA fix:
+    41	    // Do not use the full-mask empty-warp shortcut after edge lanes may have returned.
+    42	    // The normal triValid=false path below still writes zero output for live lanes.
+    43	    if (false)
+    44	#else
+    45	    if (__all_sync(0xffffffffffffffffull, !triValid))
+    46	#endif // NVDR_ROCM_INTERP_ALLSYNC64
+    47	    {
+    48	        for (int i=0; i < p.numAttr; i++)
+    49	            out[i] = 0.f;
+    50	        if (ENABLE_DA)
+    51	            for (int i=0; i < p.numDiffAttr; i++)
+    52	                outDA[i] = make_float2(0.f, 0.f);
+    53	        return;
+    54	    }
+    55	
+    56	    // Fetch vertex indices.
+    57	    int vi0 = triValid ? p.tri[triIdx * 3 + 0] : 0;
+    58	    int vi1 = triValid ? p.tri[triIdx * 3 + 1] : 0;
+===== /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip =====
+    34	    // Fetch rasterizer output.
+    35	    float4 r = ((float4*)p.rast)[pidx];
+    36	    int triIdx = float_to_triidx(r.w) - 1;
+    37	    bool triValid = (triIdx >= 0 && triIdx < p.numTriangles);
+    38	
+    39	    // If no geometry in entire warp, zero the output and exit.
+    40	    // Otherwise force barys to zero and output with live threads.
+    41	#if defined(__HIP_PLATFORM_AMD__) || defined(__HIPCC__)
+    42	    // v41m2 ROCm/RDNA fix:
+    43	    // Do not use the full-mask empty-warp shortcut after edge lanes may have returned.
+    44	    // The normal triValid=false path below still writes zero output for live lanes.
+    45	    if (false)
+    46	#else
+    47	    if (__all_sync(0xffffffffffffffffull, !triValid))
+    48	#endif // NVDR_ROCM_INTERP_ALLSYNC64
+    49	    {
+    50	        for (int i=0; i < p.numAttr; i++)
+    51	            out[i] = 0.f;
+    52	        if (ENABLE_DA)
+    53	            for (int i=0; i < p.numDiffAttr; i++)
+    54	                outDA[i] = make_float2(0.f, 0.f);
+    55	        return;
+    56	    }
+    57	
+    58	    // Fetch vertex indices.
+
+Rebuild with ROCm clang:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+rm -rf build/ dist/ ./*.egg-info
+pip uninstall -y nvdiffrast
+
+export CC=/opt/rocm/llvm/bin/clang
+export CXX=/opt/rocm/llvm/bin/clang++
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+python -m pip install . --no-build-isolation -v
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_remove_numcta_override_v45.sh
+================================================================
+[backup] csrc/torch/torch_antialias.cpp -> csrc/torch/torch_antialias.cpp.before_v45_remove_numcta_override
+[backup] csrc/torch/torch_antialias_hip.cpp -> csrc/torch/torch_antialias_hip.cpp.before_v45_remove_numcta_override
+[ok] csrc/torch/torch_antialias.cpp: kein 'numCTA = 1;'-Override vorhanden - already clean (Upstream enthaelt die Debug-Zeile nicht)
+[ok] csrc/torch/torch_antialias.cpp: AntialiasFwdAnalysisKernel laeuft mit vollem Grid (numCTA * numSM)
+[ok] csrc/torch/torch_antialias_hip.cpp: kein 'numCTA = 1;'-Override vorhanden - already clean (Upstream enthaelt die Debug-Zeile nicht)
+[ok] csrc/torch/torch_antialias_hip.cpp: AntialiasFwdAnalysisKernel laeuft mit vollem Grid (numCTA * numSM)
+
+v45 abgeschlossen: AntialiasFwdAnalysisKernel nutzt das volle numCTA*numSM-Grid.
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_v47_native_workbuffer_zero.sh
+================================================================
+[backup] csrc/torch/torch_antialias.cpp -> csrc/torch/torch_antialias.cpp.before_v47_native_workbuffer_zero
+[backup] csrc/torch/torch_antialias_hip.cpp -> csrc/torch/torch_antialias_hip.cpp.before_v47_native_workbuffer_zero
+[ok] csrc/torch/torch_antialias.cpp: 1 Aufruf(e) durch native zero_() ersetzt (v47)
+[ok] csrc/torch/torch_antialias_hip.cpp: 1 Aufruf(e) durch native zero_() ersetzt (v47)
+
+Fertig. Rebuild, dann testen:
+  1) Stabilitaet: 182x182, 256x128, 181x181 (sollten jetzt ALLE OK sein,
+     inklusive ECHTER Kernel-Launches - kein Diagnose-Skip mehr aktiv)
+  2) Korrektheit: nvdiffrast_aa_matrix_probe_v4.py / den Silhouette-FD-
+     Sweep erneut laufen lassen, um zu bestaetigen dass echte Workitems
+     wieder korrekt erzeugt/verarbeitet werden (workCount > 0, nicht 0
+     wie in den v46-Diagnoseversionen mit uebersprungenen Kerneln).
+
+================================================================
+APPLY: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/patches/patch_v51_antialias_grad_workbuffer_y_zero.sh
+================================================================
+Checking current source state...
+[ok] patched /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp
+[ok] patched /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp
+
+v51 verification:
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:135:    // v47 FIX: replace raw hipMemsetAsync (bypasses PyTorch's
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:140:    work_buffer.narrow(0, 0, 4).zero_();
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:142:    NVDR_CHECK_CUDA_ERROR(cudaMemsetAsync(p.workBuffer, 0, sizeof(int4), stream));
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:237:    // v51 FIX: replace raw gradient workBuffer y-counter memset
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:239:    work_buffer.narrow(0, 1, 1).zero_();
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:241:    NVDR_CHECK_CUDA_ERROR(cudaMemsetAsync(&p.workBuffer[0].y, 0, sizeof(int), stream));
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:136:    // v47 FIX: replace raw hipMemsetAsync (bypasses PyTorch's
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:141:    work_buffer.narrow(0, 0, 4).zero_();
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:143:    NVDR_CHECK_CUDA_ERROR(hipMemsetAsync(p.workBuffer, 0, sizeof(int4), stream));
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:238:    // v51 FIX: replace raw gradient workBuffer y-counter memset
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:240:    work_buffer.narrow(0, 1, 1).zero_();
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:242:    NVDR_CHECK_CUDA_ERROR(hipMemsetAsync(&p.workBuffer[0].y, 0, sizeof(int), stream));
+
+Strict active diagnostic marker scan:
+OK: no stale diagnostic markers/syncs in active files.
+
+Next:
+  1) Clean rebuild
+  2) Re-check v47/v51 markers in both files after rebuild
+  3) Run antialias backward/grad tests
+
+================================================================
+POST-APPLY MARKER CHECK
+================================================================
+
+v47 counts:
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:1
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1
+
+v51 counts:
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:1
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1
+
+Diagnostic marker/sync scan:
+OK: no active diagnostic markers/syncs
+
+FINAL PATCH STACK APPLIED.
+
+Next recommended commands:
+
+# Clean rebuild:
+source ~/therock_test/venv/bin/activate
+cd ~/therock_test/nvdiffrast
+
+pip uninstall -y nvdiffrast
+
+# site-packages of the *active* venv (works for any Python version):
+SITE="$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"
+rm -rf "$SITE"/nvdiffrast
+rm -rf "$SITE"/nvdiffrast-*.dist-info
+rm -rf "$SITE"/__editable__*nvdiffrast*
+rm -f  "$SITE"/_nvdiffrast_c*.so
+
+rm -rf build/ dist/ ./*.egg-info
+find . -name "*.o" -delete
+find . -name "*.so" -delete
+find . -name "*.d" -delete
+find . -name "__pycache__" -type d -prune -exec rm -rf {} +
+
+export CC=/opt/rocm/llvm/bin/clang
+export CXX=/opt/rocm/llvm/bin/clang++
+export PYTORCH_ROCM_ARCH=gfx1201
+export FORCE_CUDA=1
+export MAX_JOBS=1
+export CPATH="$HOME/therock_test/nvdiffrast_rocm_cuda_compat:/opt/rocm/include/hipsparse:${CPATH:-}"
+
+# Required: PyTorch's ROCm wheels ship c10/cuda headers but not the CMake-generated
+# c10/cuda/impl/cuda_cmake_macros.h. Without this the torch_*.cpp wrappers fail with
+# "fatal error: 'c10/cuda/impl/cuda_cmake_macros.h' file not found".
+export CPPFLAGS="-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE ${CPPFLAGS:-}"
+
+python -m pip install . --no-build-isolation --no-cache-dir -v 2>&1 | tee /tmp/build_final_v52_clean.log
+
+# Marker check after build:
+grep -c "v47 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
+grep -c "v51 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
+grep -n "v46\|v48\|v49\|v50\|hipStreamSynchronize\|hipDeviceSynchronize\|cudaStreamSynchronize\|cudaDeviceSynchronize" \
+  csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp || true
+
+# Validation:
+cd ~/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/tests
+AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 python ./nvdiffrast_path_probe_v1.py --timeout 30
+
+python ./aa_matrix_stat_probe.py --runs 20 \
+  --shapes single,grid1,grid4,grid16 \
+  --res-list 160,180,182,192,224,256 \
+  --colors interp --hashes explicit \
+  --label "final v52 forward AA"
+
+AMD_SERIALIZE_KERNEL=3 TORCH_DISABLE_ADDR2LINE=1 \
+python ./nvdiffrast_antialias_grid_bisect_v44b.py \
+  --timeout 30 \
+  --cells-list 1,4,16 \
+  --res-list 160,180,182,192,224,256 \
+  --topos explicit \
+  --colors interp \
+  --pos-grads 1 \
+  --stages call,sync,finite,diff \
+  --verbose
+
+
+=== Clean rebuild after final v52 stack ===
+
+$ bash -lc 
+set -euo pipefail
+source "/home/oem/therock_test/venv/bin/activate"
+cd "/home/oem/therock_test/nvdiffrast"
+
+pip uninstall -y nvdiffrast || true
+
+SITE="/home/oem/therock_test/venv/lib/python3.12/site-packages"
+rm -rf "$SITE"/nvdiffrast
+rm -rf "$SITE"/nvdiffrast-*.dist-info
+rm -rf "$SITE"/__editable__*nvdiffrast*
+rm -f  "$SITE"/_nvdiffrast_c*.so
+
+rm -rf build/ dist/ ./*.egg-info
+find . -name "*.o" -delete
+find . -name "*.so" -delete
+find . -name "*.d" -delete
+find . -name "__pycache__" -type d -prune -exec rm -rf {} +
+
+python -m pip install . --no-build-isolation --no-cache-dir -v
+
+Found existing installation: nvdiffrast 0.4.0
+Uninstalling nvdiffrast-0.4.0:
+  Successfully uninstalled nvdiffrast-0.4.0
+Using pip 26.1.2 from /home/oem/therock_test/venv/lib/python3.12/site-packages/pip (python 3.12)
+Processing ./.
+  Running command Preparing metadata (pyproject.toml)
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.h -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.h -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip [ok]
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/framework.h -> /home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Defs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/CudaRaster.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Constants.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/PrivateDefs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/CudaRaster.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.h -> /home/oem/therock_test/nvdiffrast/csrc/common/texture.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp [skipped, already hipified]
+  Successfully preprocessed all matching files.
+  Total number of unsupported CUDA function calls: 0
+
+
+  Total number of replaced kernel launches: 0
+  running dist_info
+  creating /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info
+  writing /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/requires.txt
+  writing top-level names to /tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/top_level.txt
+  writing manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest template 'MANIFEST.in'
+  warning: no previously-included files matching '*~' found anywhere in distribution
+  warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+  warning: no previously-included files matching '*.so' found anywhere in distribution
+  warning: no previously-included files matching '__pycache__' found anywhere in distribution
+  warning: no previously-included files matching '.git*' found anywhere in distribution
+  warning: no previously-included files matching '.DS_Store' found anywhere in distribution
+  warning: no previously-included files matching '*.egg-info' found anywhere in distribution
+  warning: no previously-included files matching 'build' found anywhere in distribution
+  warning: no previously-included files matching 'dist' found anywhere in distribution
+  adding license file 'LICENSE.txt'
+  writing manifest file '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast.egg-info/SOURCES.txt'
+  creating '/tmp/pip-modern-metadata-5p0evzqb/nvdiffrast-0.4.0.dist-info'
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: numpy in /home/oem/therock_test/venv/lib/python3.12/site-packages (from nvdiffrast==0.4.0) (2.5.1)
+Building wheels for collected packages: nvdiffrast
+  Running command Building wheel for nvdiffrast (pyproject.toml)
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.h -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.h -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/antialias.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/common.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/framework.h -> /home/oem/therock_test/nvdiffrast/csrc/common/framework_hip.h [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Defs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Defs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Buffer.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/CudaRaster.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/CudaRaster.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/Constants.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Constants.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/PrivateDefs.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/PrivateDefs.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.hpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.hpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/CudaRaster.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/cudaraster/impl/RasterImpl_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.h -> /home/oem/therock_test/nvdiffrast/csrc/common/texture.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.cu -> /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_types.h [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp [skipped, no changes]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp [skipped, already hipified]
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture.cpp -> /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp [skipped, already hipified]
+  Successfully preprocessed all matching files.
+  Total number of unsupported CUDA function calls: 0
+
+
+  Total number of replaced kernel launches: 0
+  running bdist_wheel
+  running build
+  running build_py
+  creating build/lib.linux-x86_64-cpython-312/nvdiffrast
+  copying nvdiffrast/__init__.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast
+  creating build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  copying nvdiffrast/torch/ops.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  copying nvdiffrast/torch/__init__.py -> build/lib.linux-x86_64-cpython-312/nvdiffrast/torch
+  running egg_info
+  creating nvdiffrast.egg-info
+  writing nvdiffrast.egg-info/PKG-INFO
+  writing dependency_links to nvdiffrast.egg-info/dependency_links.txt
+  writing requirements to nvdiffrast.egg-info/requires.txt
+  writing top-level names to nvdiffrast.egg-info/top_level.txt
+  writing manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  reading manifest template 'MANIFEST.in'
+  warning: no previously-included files matching '*~' found anywhere in distribution
+  warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+  warning: no previously-included files matching '*.so' found anywhere in distribution
+  warning: no previously-included files matching '__pycache__' found anywhere in distribution
+  warning: no previously-included files matching '.git*' found anywhere in distribution
+  warning: no previously-included files matching '.DS_Store' found anywhere in distribution
+  warning: no previously-included files matching '*.egg-info' found anywhere in distribution
+  warning: no previously-included files matching 'build' found anywhere in distribution
+  warning: no previously-included files matching 'dist' found anywhere in distribution
+  adding license file 'LICENSE.txt'
+  writing manifest file 'nvdiffrast.egg-info/SOURCES.txt'
+  running build_ext
+  building '_nvdiffrast_c' extension
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl
+  creating /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch
+  [1/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/antialias.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [2/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/common_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [3/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:29:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+     29 |         hipFree(m_gpuPtr); // Don't throw an exception.
+        |         ^~~~~~~~~~~~~~~~~
+  /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/Buffer.cpp:69:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+     69 |         hipHostFree(m_hostPtr); // Don't throw an exception.
+        |         ^~~~~~~~~~~~~~~~~~~~~~
+  2 warnings generated.
+  [4/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/CudaRaster.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [5/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [6/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/hipraster/impl/RasterImpl_kernel.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl_kernel.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [7/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/interpolate.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/interpolate.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [8/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/rasterize.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/rasterize.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [9/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/common/texture_hip.cpp:34:9: warning: unused variable 'mipTotal' [-Wunused-variable]
+     34 |     int mipTotal = 0;
+        |         ^~~~~~~~
+  1 warning generated.
+  [10/15] /opt/rocm/bin/hipcc  -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/common/texture_kernel.hip -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_kernel.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DCUDA_HAS_FP16=1 -D__HIP_NO_HALF_OPERATORS__=1 -D__HIP_NO_HALF_CONVERSIONS__=1 -DHIP_ENABLE_WARP_SYNC_BUILTINS=1 -DNVDR_TORCH -lineinfo -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c --offload-arch=gfx1201 -fno-gpu-rdc -std=c++20
+  clang++: warning: -lineinfo: 'linker' input unused [-Wunused-command-line-argument]
+  [11/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [12/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_bindings.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [13/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /home/oem/therock_test/nvdiffrast/csrc/torch/torch_interpolate_hip.cpp:211:26: warning: unused variable 'opts' [-Wunused-variable]
+    211 |     torch::TensorOptions opts = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA);
+        |                          ^~~~
+  1 warning generated.
+  [14/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_rasterize_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  [15/15] /opt/rocm/llvm/bin/clang++ -MMD -MF /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o.d -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -fPIC -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include -I/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/include/THH -I/opt/rocm/include -I/home/oem/therock_test/venv/include -I/usr/include/python3.12 -c -c /home/oem/therock_test/nvdiffrast/csrc/torch/torch_texture_hip.cpp -o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -D__HIP_PLATFORM_AMD__=1 -DUSE_ROCM=1 -DHIPBLAS_V2 -fPIC -DNVDR_TORCH -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=_nvdiffrast_c -std=c++20
+  /opt/rocm/llvm/bin/clang++ -fno-strict-overflow -Wsign-compare -DNDEBUG -g -O2 -Wall -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE -shared -Wl,-O1 -Wl,-Bsymbolic-functions -DC10_CUDA_NO_CMAKE_CONFIGURE_FILE /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/antialias.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/common_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/Buffer.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/CudaRaster.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/hipraster/impl/RasterImpl_kernel.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/interpolate.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/rasterize.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/common/texture_kernel.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_antialias_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_bindings.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_interpolate_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_rasterize_hip.o /home/oem/therock_test/nvdiffrast/build/temp.linux-x86_64-cpython-312/csrc/torch/torch_texture_hip.o -L/home/oem/therock_test/venv/lib/python3.12/site-packages/torch/lib -L/opt/rocm/lib -L/opt/rocm/hip/lib -L/usr/lib/x86_64-linux-gnu -lc10 -ltorch -ltorch_cpu -ltorch_python -lamdhip64 -lc10_hip -ltorch_hip -o build/lib.linux-x86_64-cpython-312/_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so
+  installing to build/bdist.linux-x86_64/wheel
+  running install
+  running install_lib
+  creating build/bdist.linux-x86_64/wheel
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/torch/ops.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/torch/__init__.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast/torch
+  copying build/lib.linux-x86_64-cpython-312/nvdiffrast/__init__.py -> build/bdist.linux-x86_64/wheel/./nvdiffrast
+  copying build/lib.linux-x86_64-cpython-312/_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so -> build/bdist.linux-x86_64/wheel/.
+  running install_egg_info
+  Copying nvdiffrast.egg-info to build/bdist.linux-x86_64/wheel/./nvdiffrast-0.4.0-py3.12.egg-info
+  running install_scripts
+  creating build/bdist.linux-x86_64/wheel/nvdiffrast-0.4.0.dist-info/WHEEL
+  creating '/tmp/pip-ephem-wheel-cache-1z_4ksyt/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f/tmp_vsxjekl/.tmp-2atvu3vb/nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+  adding '_nvdiffrast_c.cpython-312-x86_64-linux-gnu.so'
+  adding 'nvdiffrast/__init__.py'
+  adding 'nvdiffrast/torch/__init__.py'
+  adding 'nvdiffrast/torch/ops.py'
+  adding 'nvdiffrast-0.4.0.dist-info/licenses/LICENSE.txt'
+  adding 'nvdiffrast-0.4.0.dist-info/METADATA'
+  adding 'nvdiffrast-0.4.0.dist-info/WHEEL'
+  adding 'nvdiffrast-0.4.0.dist-info/top_level.txt'
+  adding 'nvdiffrast-0.4.0.dist-info/RECORD'
+  removing build/bdist.linux-x86_64/wheel
+  Building wheel for nvdiffrast (pyproject.toml) ... done
+  Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=3505155 sha256=1a190eec04cda495344717ec13915d28052e0a0a4bd180902518aa8b6937375c
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1z_4ksyt/wheels/34/b2/b1/40ad8631b4cff09ecbe2c6f120485d374bda653f905ade6d7f
+Successfully built nvdiffrast
+Installing collected packages: nvdiffrast
+Successfully installed nvdiffrast-0.4.0
+
+=== Verify v52 markers after clean rebuild / hipify ===
+
+=== v52 marker check ===
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp: v47=1 v51=1
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp: v47=1 v51=1
+OK: v47/v51 markers clean and no diagnostic sync markers found.
+
+=== Copy validation tests into bundle ===
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_min_triangle.sh
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_advanced_pipeline.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/run_test_advanced_pipeline.sh
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_rasterizer_gradients_v4.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_v52_marker_integrity.sh
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/run_v52_validation.sh
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/run_v52_stress.sh
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/nvdiffrast_path_probe_v1.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/nvdiffrast_aa_matrix_probe_v4.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/aa_matrix_stat_probe.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_antialias_backward_matrix_v52.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/nvdiffrast_interpolate_resolution_probe_v6.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/test_many_triangles_stress_v1.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/aa_backward_pos_stat_probe_v52.py
+copied: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle/run_v52_backward_stat.sh
+
+=== Run validation ===
+
+=== Run v52 marker integrity test ===
+
+$ bash /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests/test_v52_marker_integrity.sh
+  cwd: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests
+===== v47 marker check =====
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:1
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1
+===== v51 marker check =====
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias.cpp:1
+/home/oem/therock_test/nvdiffrast/csrc/torch/torch_antialias_hip.cpp:1
+===== diagnostic marker scan =====
+OK: v52 markers are clean.
+
+=== Run v52 validation suite ===
+
+$ bash /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests/run_v52_validation.sh
+  cwd: /home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests
+===== v52 path probe =====
+Teste 14 Pfad(e), Timeout=30s pro Pfad:
+
+--- import ---
+  -> OK (rc=0, 2.7s)
+
+--- rasterize_forward_min ---
+  -> OK (rc=0, 2.8s)
+
+--- interpolate_forward_min ---
+  -> OK (rc=0, 2.8s)
+
+--- interpolate_backward_color ---
+  -> OK (rc=0, 2.9s)
+
+--- rasterize_interpolate_backward_pos ---
+  -> OK (rc=0, 2.9s)
+
+--- grid_forward ---
+  -> OK (rc=0, 2.9s)
+
+--- grid_backward_pos ---
+  -> OK (rc=0, 2.9s)
+
+--- topology_hash ---
+  -> OK (rc=0, 2.8s)
+
+--- antialias_forward_single_tri ---
+  -> OK (rc=0, 2.8s)
+
+--- texture_forward ---
+  -> OK (rc=0, 2.8s)
+
+--- antialias_forward_grid ---
+  -> OK (rc=0, 2.8s)
+
+--- antialias_backward_color_direct ---
+  -> OK (rc=0, 2.9s)
+
+--- antialias_backward_pos_grid ---
+  -> OK (rc=0, 2.9s)
+
+--- texture_backward ---
+  -> OK (rc=0, 2.9s)
+
+
+===== SUMMARY =====
+import                                   OK
+rasterize_forward_min                    OK
+interpolate_forward_min                  OK
+interpolate_backward_color               OK
+rasterize_interpolate_backward_pos       OK
+grid_forward                             OK
+grid_backward_pos                        OK
+topology_hash                            OK
+antialias_forward_single_tri             OK
+texture_forward                          OK
+antialias_forward_grid                   OK
+antialias_backward_color_direct          OK
+antialias_backward_pos_grid              OK
+texture_backward                         OK
+
+passed=14 failed_or_timeout=0 total=14
+
+===== v52 AA forward matrix =====
+AA matrix probe: cases=24 timeout=30s
+shapes=['single', 'grid1', 'grid4', 'grid16']
+colors=['interp']
+hashes=['explicit']
+res=[160, 180, 182, 192, 224, 256]
+
+[001/024] single res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.30s
+[002/024] single res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.33s
+[003/024] single res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.33s
+[004/024] single res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.33s
+[005/024] single res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.33s
+[006/024] single res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.31s
+[007/024]  grid1 res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.35s
+[008/024]  grid1 res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+[009/024]  grid1 res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.36s
+[010/024]  grid1 res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.35s
+[011/024]  grid1 res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.35s
+[012/024]  grid1 res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.36s
+[013/024]  grid4 res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+[014/024]  grid4 res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.33s
+[015/024]  grid4 res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.34s
+[016/024]  grid4 res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.38s
+[017/024]  grid4 res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.36s
+[018/024]  grid4 res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+[019/024] grid16 res=160 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+[020/024] grid16 res=180 color=interp hash=explicit
+    -> OK               rc=0 time=3.38s
+[021/024] grid16 res=182 color=interp hash=explicit
+    -> OK               rc=0 time=3.35s
+[022/024] grid16 res=192 color=interp hash=explicit
+    -> OK               rc=0 time=3.36s
+[023/024] grid16 res=224 color=interp hash=explicit
+    -> OK               rc=0 time=3.38s
+[024/024] grid16 res=256 color=interp hash=explicit
+    -> OK               rc=0 time=3.37s
+
+===== SUMMARY BY CASE =====
+single  res=160  color=interp  hash=explicit  OK
+single  res=180  color=interp  hash=explicit  OK
+single  res=182  color=interp  hash=explicit  OK
+single  res=192  color=interp  hash=explicit  OK
+single  res=224  color=interp  hash=explicit  OK
+single  res=256  color=interp  hash=explicit  OK
+ grid1  res=160  color=interp  hash=explicit  OK
+ grid1  res=180  color=interp  hash=explicit  OK
+ grid1  res=182  color=interp  hash=explicit  OK
+ grid1  res=192  color=interp  hash=explicit  OK
+ grid1  res=224  color=interp  hash=explicit  OK
+ grid1  res=256  color=interp  hash=explicit  OK
+ grid4  res=160  color=interp  hash=explicit  OK
+ grid4  res=180  color=interp  hash=explicit  OK
+ grid4  res=182  color=interp  hash=explicit  OK
+ grid4  res=192  color=interp  hash=explicit  OK
+ grid4  res=224  color=interp  hash=explicit  OK
+ grid4  res=256  color=interp  hash=explicit  OK
+grid16  res=160  color=interp  hash=explicit  OK
+grid16  res=180  color=interp  hash=explicit  OK
+grid16  res=182  color=interp  hash=explicit  OK
+grid16  res=192  color=interp  hash=explicit  OK
+grid16  res=224  color=interp  hash=explicit  OK
+grid16  res=256  color=interp  hash=explicit  OK
+
+===== COMPACT MATRIX =====
+shape/color/hash         160 180 182 192 224 256
+------------------------------------------------
+single/interp/explicit    OK  OK  OK  OK  OK  OK
+grid1/interp/explicit     OK  OK  OK  OK  OK  OK
+grid4/interp/explicit     OK  OK  OK  OK  OK  OK
+grid16/interp/explicit    OK  OK  OK  OK  OK  OK
+
+passed=24 failed_or_timeout=0 total=24
+
+===== v52 AA backward / grad matrix =====
+AA grid bisect cases=72 timeout=30s
+
+[001/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[002/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[003/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.84s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[004/072] cells=1 res=160 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=160 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 3.5762786865234375e-06 diff sum: 0.0016378089785575867
+      changed: 572
+[005/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.82s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[006/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.79s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[007/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[008/072] cells=1 res=180 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.90s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=180 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 4.172325134277344e-06 diff sum: 0.002106882631778717
+      changed: 644
+[009/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[010/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.82s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[011/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.84s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[012/072] cells=1 res=182 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=182 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.18956458568572998 diff sum: 98.10213470458984
+      changed: 652
+[013/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[014/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.82s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[015/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[016/072] cells=1 res=192 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=192 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.37812286615371704 diff sum: 411.59765625
+      changed: 686
+[017/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[018/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[019/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[020/072] cells=1 res=224 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=224 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.3794693946838379 diff sum: 241.80322265625
+      changed: 804
+[021/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[022/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[023/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.84s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[024/072] cells=1 res=256 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=1 res=256 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 4 triangles: 2
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.1894502490758896 diff sum: 275.39581298828125
+      changed: 918
+[025/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[026/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[027/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.84s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[028/072] cells=4 res=160 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=160 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 3.5762786865234375e-06 diff sum: 0.0016206689178943634
+      changed: 566
+[029/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[030/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[031/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.84s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[032/072] cells=4 res=180 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=180 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 4.172325134277344e-06 diff sum: 0.002083834260702133
+      changed: 636
+[033/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[034/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[035/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.83s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[036/072] cells=4 res=182 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.88s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=182 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.18956458568572998 diff sum: 98.10213470458984
+      changed: 652
+[037/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[038/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[039/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[040/072] cells=4 res=192 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.88s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=192 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.37812289595603943 diff sum: 404.397705078125
+      changed: 674
+[041/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.79s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[042/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[043/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[044/072] cells=4 res=224 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=224 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.3794693946838379 diff sum: 240.60321044921875
+      changed: 800
+[045/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[046/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.82s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[047/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[048/072] cells=4 res=256 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=4 res=256 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 25 triangles: 32
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.1894502490758896 diff sum: 272.995849609375
+      changed: 910
+[049/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.82s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[050/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[051/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[052/072] cells=16 res=160 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=160 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 3.5762786865234375e-06 diff sum: 0.0015516020357608795
+      changed: 542
+[053/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[054/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[055/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[056/072] cells=16 res=180 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=180 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 4.172325134277344e-06 diff sum: 0.0020056776702404022
+      changed: 612
+[057/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[058/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[059/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.86s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[060/072] cells=16 res=182 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=182 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.18956458568572998 diff sum: 94.31414794921875
+      changed: 626
+[061/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.80s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[062/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.81s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[063/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.85s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[064/072] cells=16 res=192 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.93s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=192 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.37812286615371704 diff sum: 379.19781494140625
+      changed: 632
+[065/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.91s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[066/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.88s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[067/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.93s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[068/072] cells=16 res=224 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.91s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=224 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.3794693946838379 diff sum: 236.40316772460938
+      changed: 786
+[069/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=call
+    -> OK rc=0 time=2.87s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=call
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+[070/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=sync
+    -> OK rc=0 time=2.88s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=sync
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+[071/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=finite
+    -> OK rc=0 time=2.93s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=finite
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      finite: True
+[072/072] cells=16 res=256 topo=explicit color=interp pg=1 stage=diff
+    -> OK rc=0 time=2.96s
+    stdout:
+      torch=2.13.0+rocm7.2 hip=7.2.53211
+      case cells=16 res=256 topo=explicit color=interp pos_grad=True stage=diff
+      vertices: 289 triangles: 512
+      rasterize sync OK
+      interpolate sync OK
+      topology hash sync OK
+      antialias call returned
+      antialias sync OK
+      diff max: 0.18945030868053436 diff sum: 262.7960205078125
+      changed: 876
+
+===== SUMMARY =====
+cells=1 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
+cells=1 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.82s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.79s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
+cells=1 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.90s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
+cells=1 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.83s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
+cells=1 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.80s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
+cells=1 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
+cells=1 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.83s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
+cells=4 res=160 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.81s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.83s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.84s
+cells=4 res=180 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.86s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.83s
+cells=4 res=182 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.88s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
+cells=4 res=192 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.88s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.79s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.81s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.85s
+cells=4 res=224 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=call                                      OK rc=0 time=2.80s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=sync                                      OK rc=0 time=2.82s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=finite                                    OK rc=0 time=2.87s
+cells=4 res=256 topo=explicit color=interp pg=1 stage=diff                                      OK rc=0 time=2.87s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.82s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.87s
+cells=16 res=160 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.85s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.81s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.86s
+cells=16 res=180 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.87s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.81s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.80s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.86s
+cells=16 res=182 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.87s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.80s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.81s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.85s
+cells=16 res=192 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.93s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.91s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.88s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.93s
+cells=16 res=224 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.91s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=call                                     OK rc=0 time=2.87s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=sync                                     OK rc=0 time=2.88s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=finite                                   OK rc=0 time=2.93s
+cells=16 res=256 topo=explicit color=interp pg=1 stage=diff                                     OK rc=0 time=2.96s
+
+passed=72 failed=0 total=72
+
+v52 validation completed.
+
+=== DONE ===
+Patched nvdiffrast is installed in: /home/oem/therock_test/venv
+Patched nvdiffrast repo: /home/oem/therock_test/nvdiffrast
+Validation bundle: /home/oem/therock_test/nvdiffrast_rocm72_gfx1201_final_v52_bundle
+
+Recommended commands:
+  cd "/home/oem/therock_test/nvdiffrast" && grep -c "v47 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
+  cd "/home/oem/therock_test/nvdiffrast" && grep -c "v51 FIX" csrc/torch/torch_antialias.cpp csrc/torch/torch_antialias_hip.cpp
+  cd "/home/oem/therock_test/amd-nvdiffrast-rocm72-gfx1201/tests" && ./run_v52_validation.sh
