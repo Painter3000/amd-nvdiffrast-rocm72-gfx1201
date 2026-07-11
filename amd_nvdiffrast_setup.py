@@ -91,6 +91,19 @@ def make_env(args: argparse.Namespace, root: Path, repo: Path, venv: Path, bundl
     env.setdefault("CC", str(Path(args.rocm_path) / "llvm" / "bin" / "clang"))
     env.setdefault("CXX", str(Path(args.rocm_path) / "llvm" / "bin" / "clang++"))
 
+    # NVDR_ROCM_C10_NO_CMAKE_CONFIGURE
+    # csrc/common/framework.h pulls in <ATen/cuda/CUDAContext.h>, whose chain ends
+    # at <c10/cuda/CUDAMacros.h>. That header includes the CMake-generated file
+    # c10/cuda/impl/cuda_cmake_macros.h, which PyTorch's ROCm wheels do not ship.
+    # CUDAMacros.h documents the escape hatch for exactly the AMD/HIP case, so we
+    # define it for the host C++ objects (the torch_*.cpp wrappers).
+    # This must be set here as well, not just in the generator: the clean rebuild
+    # after the v52 patch stack runs its own `pip install .` with this env.
+    c10_guard = "-DC10_CUDA_NO_CMAKE_CONFIGURE_FILE"
+    cppflags = env.get("CPPFLAGS", "")
+    if c10_guard not in cppflags:
+        env["CPPFLAGS"] = f"{c10_guard} {cppflags}".strip()
+
     compat = root / "nvdiffrast_rocm_cuda_compat"
     cpath_parts = [str(compat), str(Path(args.rocm_path) / "include" / "hipsparse")]
     if env.get("CPATH"):
