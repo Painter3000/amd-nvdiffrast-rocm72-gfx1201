@@ -1,0 +1,13 @@
+torch: 2.13.0+rocm7.2
+hip: 7.2.53211
+device: AMD Radeon Graphics
+nvdiffrast: /home/oem/therock_test/venv/lib/python3.12/site-packages/nvdiffrast
+torch_scatter: 2.1.2
+trimesh: 4.12.2
+imageio: 2.37.3
+tqdm: 4.68.4
+matplotlib: 3.11.0
+device name: AMD Radeon Graphics
+gcnArchName: gfx1201
+multi_processor_count: 32
+total_memory_GB: 29.86
