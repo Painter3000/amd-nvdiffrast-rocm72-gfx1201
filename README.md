@@ -24,7 +24,8 @@ clone upstream nvdiffrast
 
 **Current validated stack:** final v52  
 **Fresh-host validation:** passed on 2026-07-11  
-**Fresh-host quick-validation result:** **110 / 110 checks passed**
+**Fresh-host quick-validation result:** **110 / 110 checks passed**  
+**Downstream end-to-end validation:** passed — `Profactor/continuous-remeshing`, **100 / 100 steps**
 
 ### Fresh-host validated environment
 
@@ -61,6 +62,28 @@ PYTORCH_ROCM_ARCH=gfx1201
 | Antialias forward matrix | 24 | 0 |
 | Antialias backward/gradient matrix | 72 | 0 |
 | **Total** | **110** | **0** |
+
+### Downstream end-to-end validation
+
+The quick suite covers fixed resolutions and fixed topologies. A second,
+independent validation runs a real differentiable-rendering workload in which the
+mesh topology changes on every step:
+
+| Metric | Value |
+|---|---|
+| Project | `Profactor/continuous-remeshing`, unmodified `example.py` |
+| Steps completed | **100 / 100** |
+| Final loss | `0.00829143` |
+| Final vertices / faces | `5814` / `11624` |
+| Throughput | ≈ 24.27 it/s |
+| GPU architecture | `gfx1201`, 32 CUs, 29.86 GB |
+
+- [Downstream end-to-end validation report](docs/validation/downstream-continuous-remeshing-gfx1201.md)
+
+These figures act as a **regression anchor**: future changes to the patch stack
+should keep the final loss, vertex count, face count and visual result in the
+same range. They also make it possible to *exclude* nvdiffrast as a cause when a
+downstream project misbehaves.
 
 ### Extended development validation
 
@@ -687,9 +710,17 @@ Older copies of the wrapper did not change into `$REPO`.
 
 ### PyTorch reports `AMD Radeon Graphics`
 
-A generic device string is not by itself a failure.
+A generic device string is not by itself a failure. `torch.cuda.get_device_name(0)`
+may report the card generically; the architecture can be confirmed independently:
 
-Confirm:
+```python
+import torch
+p = torch.cuda.get_device_properties(0)
+print(p.gcnArchName)            # gfx1201
+print(p.multi_processor_count)  # 32 on the AI PRO R9700
+```
+
+Also confirm:
 
 ```text
 torch.cuda.is_available() == True
@@ -745,7 +776,15 @@ tests/
     marker, path, forward, backward and stress validation tools
 
 docs/
-    technical notes, open questions and validation evidence
+    technical notes and open questions
+
+docs/validation/
+    fresh-host installation report and raw log
+    downstream end-to-end report (continuous-remeshing)
+
+docs/validation/downstream/
+    captured environment, dependency freeze, run log and result preview
+    for the downstream end-to-end test
 
 third_party/
     upstream licenses and attribution material
@@ -759,14 +798,21 @@ See [docs/KNOWN_OPEN_QUESTIONS_v52.md](docs/KNOWN_OPEN_QUESTIONS_v52.md).
 
 Important areas outside the current validation envelope include:
 
+- **a cross-vendor numerical reference.** The downstream test anchors the result
+  against itself, not against CUDA. A run of the same example with the same seed
+  on an NVIDIA GPU would confirm that gradient scaling matches. A reference
+  `FINAL_LOSS` from a CUDA machine would be a welcome contribution;
 - very large production meshes,
-- long PSHuman or continuous-remeshing optimization loops,
+- longer optimization loops than the 100-step downstream run, and PSHuman-scale
+  pipelines,
 - clipping and offscreen geometry stress cases,
 - depth-ordering and Z-sensitive finite-difference tests,
 - texture stress beyond the current basic forward/backward coverage,
 - performance benchmarking against CUDA or native PyTorch paths,
 - multi-batch and multi-view production workloads,
-- resolutions substantially above the current 160–256 antialias matrix.
+- resolutions substantially above the current 160–256 antialias matrix,
+- GPUs other than `gfx1201`. RDNA3 (`gfx1100`) uses the same native Wave32
+  execution model and is expected to work, but has not been tested here.
 
 These are not documented failures of final v52. They remain additional validation targets.
 
