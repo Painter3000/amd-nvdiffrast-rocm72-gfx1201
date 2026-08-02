@@ -4,11 +4,10 @@
 <details>
 <summary><strong>ROCm / gfx1201 port note</strong></summary>
 
-- Type: ROCm/HIP patch, build and validation bundle for `NVlabs/nvdiffrast`.
+- ROCm/HIP patch, build and validation bundle for `NVlabs/nvdiffrast`.
 - Target: AMD Radeon AI PRO R9700 / RDNA4 / `gfx1201`.
-- Stack: ROCm 7.2, Python 3.12, PyTorch `2.13.0+rocm7.2`, HIP `7.2.53211`.
+- Stack: ROCm 7.2, Python 3.12, PyTorch `2.13.0+rocm7.2`.
 - Validation: fresh-host **110/110 PASS**; downstream remeshing **100/100 steps PASS**.
-- Upstream base: `NVlabs/nvdiffrast` `0.4.0`; final v52 patch stack.
 
 </details>
 <!-- PAINTER3000_STATUS_BLOCK_END -->
