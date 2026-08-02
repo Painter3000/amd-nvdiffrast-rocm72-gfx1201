@@ -1,5 +1,17 @@
 # AMD nvdiffrast ROCm 7.2 / RDNA4 gfx1201 — final v52 patch stack
 
+<!-- PAINTER3000_STATUS_BLOCK_START -->
+## Repository snapshot
+
+- **Repository type:** Community ROCm/HIP patch, build, and validation bundle for upstream `NVlabs/nvdiffrast`.
+- **Target GPU:** AMD Radeon AI PRO R9700.
+- **Target architecture:** RDNA4 / `gfx1201`.
+- **Target stack:** Ubuntu 24.04, ROCm 7.2, Python 3.12, PyTorch `2.13.0+rocm7.2`, HIP `7.2.53211`.
+- **Validation status:** Fresh-host quick validation **110/110 PASS**; downstream `Profactor/continuous-remeshing` **100/100 steps PASS**.
+- **Upstream base:** `NVlabs/nvdiffrast` `0.4.0`; final v52 patch stack.
+<!-- PAINTER3000_STATUS_BLOCK_END -->
+
+
 Community patch, build and validation bundle for running [`NVlabs/nvdiffrast`](https://github.com/NVlabs/nvdiffrast) on AMD RDNA4 / `gfx1201` with ROCm 7.2.
 
 > [!IMPORTANT]
