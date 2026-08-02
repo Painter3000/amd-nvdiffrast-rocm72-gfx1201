@@ -1,22 +1,18 @@
 # AMD nvdiffrast ROCm 7.2 / RDNA4 gfx1201 — final v52 patch stack
 
 <!-- PAINTER3000_STATUS_BLOCK_START -->
-## Quick status
-
-| Type | Target | Validation |
-|---|---|---|
-| ROCm/HIP patch + validation bundle for `NVlabs/nvdiffrast` | R9700 / RDNA4 `gfx1201`, ROCm 7.2, PyTorch `2.13.0+rocm7.2` | **PASS** — fresh-host **110/110**, downstream remeshing **100/100** |
-
 <details>
-<summary>Stack and upstream details</summary>
+<summary><strong>ROCm / gfx1201 port note</strong></summary>
 
-- Upstream base: `NVlabs/nvdiffrast` `0.4.0`
-- Patch stack: final v52
-- Python: 3.12
-- HIP reported by PyTorch: `7.2.53211`
+- Type: ROCm/HIP patch, build and validation bundle for `NVlabs/nvdiffrast`.
+- Target: AMD Radeon AI PRO R9700 / RDNA4 / `gfx1201`.
+- Stack: ROCm 7.2, Python 3.12, PyTorch `2.13.0+rocm7.2`, HIP `7.2.53211`.
+- Validation: fresh-host **110/110 PASS**; downstream remeshing **100/100 steps PASS**.
+- Upstream base: `NVlabs/nvdiffrast` `0.4.0`; final v52 patch stack.
 
 </details>
 <!-- PAINTER3000_STATUS_BLOCK_END -->
+
 Community patch, build and validation bundle for running [`NVlabs/nvdiffrast`](https://github.com/NVlabs/nvdiffrast) on AMD RDNA4 / `gfx1201` with ROCm 7.2.
 
 > [!IMPORTANT]
